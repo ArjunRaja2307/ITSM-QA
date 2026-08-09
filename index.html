@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ITSM QA Dashboard | Aquera</title>
+<style>
+:root{--pri:#1e3a5f;--pri2:#2563eb;--acc:#0ea5e9;--green:#16a34a;--gbg:#dcfce7;--amber:#d97706;--abg:#fef3c7;--purple:#7c3aed;--pbg:#ede9fe;--red:#dc2626;--rbg:#fee2e2;--blue:#2563eb;--bbg:#dbeafe;--teal:#0d9488;--tbg:#ccfbf1;--orange:#ea580c;--obg:#ffedd5;--bg:#f0f4f8;--card:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;--sh:0 1px 3px rgba(0,0,0,.1);--shm:0 4px 6px rgba(0,0,0,.07);--shl:0 10px 25px rgba(0,0,0,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px}
+
+/* ── LOGIN ── */
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a1628 0%,#1e3a5f 55%,#1d4ed8 100%);padding:20px}
+.lcard{background:#fff;border-radius:20px;padding:40px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.35)}
+.llogo{width:56px;height:56px;background:linear-gradient(135deg,#38bdf8,#818cf8);border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff;margin:0 auto 18px;letter-spacing:-1px}
+.ltitle{text-align:center;font-size:22px;font-weight:800;margin-bottom:4px}
+.lsub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px}
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:11px;font-weight:700;color:#475569;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.fi{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;transition:border-color .2s}
+.fi:focus{outline:none;border-color:var(--pri2)}
+.lbtn{width:100%;padding:12px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;transition:all .2s}
+.lbtn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(37,99,235,.4)}
+.lerr{color:var(--red);font-size:12px;margin:6px 0;text-align:center;min-height:18px}
+.lfooter{text-align:center;margin-top:18px;font-size:11px;color:#94a3b8}
+
+/* ── HEADER ── */
+header{background:linear-gradient(135deg,#0f2441,#1e3a5f 60%,#1d4ed8);color:#fff;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;box-shadow:0 4px 12px rgba(0,0,0,.2);position:sticky;top:0;z-index:200}
+.hlogo{width:36px;height:36px;background:linear-gradient(135deg,#38bdf8,#818cf8);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;letter-spacing:-1px}
+.htitle{font-size:16px;font-weight:700}
+.hsub{font-size:10px;opacity:.7;margin-top:1px}
+.hright{display:flex;align-items:center;gap:10px}
+.hdate{font-size:11px;opacity:.7}
+.user-pill{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600}
+.role-tag{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800;text-transform:uppercase}
+.rt-admin{background:#fde68a;color:#92400e}
+.rt-editor{background:#bbf7d0;color:#14532d}
+.rt-viewer{background:#dbeafe;color:#1e40af}
+.hbtn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s}
+.hbtn:hover{background:rgba(255,255,255,.2)}
+
+/* ── ADMIN BAR ── */
+#adminBar{display:none;background:linear-gradient(90deg,#16a34a,#15803d);color:#fff;padding:5px 20px;font-size:12px;font-weight:700;text-align:center;letter-spacing:.4px}
+#adminBar.show{display:block}
+
+/* ── TABS ── */
+.tabs-bar{background:#fff;border-bottom:2px solid var(--border);padding:0 20px;display:flex;gap:0;box-shadow:var(--sh);position:sticky;top:60px;z-index:190}
+.tbtn{padding:13px 18px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tbtn:hover{color:var(--pri);background:#f8fafc}
+.tbtn.active{color:var(--pri2);border-bottom-color:var(--pri2)}
+
+/* ── MAIN ── */
+main{padding:18px 20px;max-width:1900px;margin:0 auto}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CARDS / STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.stat-card{background:var(--card);border-radius:12px;padding:15px 16px;box-shadow:var(--sh);border-left:4px solid;transition:transform .2s,box-shadow .2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shm)}
+.snum{font-size:28px;font-weight:800;line-height:1;margin-bottom:3px}
+.slbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.sc-total{border-color:var(--pri2)}.sc-total .snum{color:var(--pri2)}
+.sc-dep{border-color:var(--green)}.sc-dep .snum{color:var(--green)}
+.sc-test{border-color:var(--amber)}.sc-test .snum{color:var(--amber)}
+.sc-pre{border-color:var(--purple)}.sc-pre .snum{color:var(--purple)}
+.sc-ready{border-color:var(--blue)}.sc-ready .snum{color:var(--blue)}
+.sc-blk{border-color:var(--red)}.sc-blk .snum{color:var(--red)}
+
+/* ── PANEL ── */
+.panel{background:var(--card);border-radius:12px;padding:18px;box-shadow:var(--sh);margin-bottom:16px}
+.ptitle{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.prow{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.plbl{width:190px;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbwrap{flex:1;height:9px;background:var(--bg);border-radius:5px;overflow:hidden}
+.pbfill{height:100%;border-radius:5px;transition:width .5s}
+.pcnt{width:28px;text-align:right;font-size:11px;font-weight:700;color:var(--muted)}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.bd{background:var(--gbg);color:var(--green)}
+.bt{background:var(--abg);color:var(--amber)}
+.bp{background:var(--pbg);color:var(--purple)}
+.br{background:var(--bbg);color:var(--blue)}
+.bb{background:var(--rbg);color:var(--red)}
+
+/* ── FEATURE STATUS ── */
+.fs{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;text-align:center;min-width:34px}
+.fs-P{background:#dcfce7;color:#15803d}
+.fs-F{background:#fee2e2;color:#dc2626}
+.fs-IP{background:#fef3c7;color:#b45309}
+.fs-NT{background:#f3f4f6;color:#6b7280}
+.fs-IMPL{background:#dbeafe;color:#1d4ed8}
+.fs-NI{background:#f1f5f9;color:#475569}
+.fs-BL{background:#ffedd5;color:#ea580c}
+.fs-NA{background:#f8fafc;color:#cbd5e1;border:1px solid #e2e8f0}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:12px;box-shadow:var(--sh)}
+table{width:100%;border-collapse:collapse;background:#fff}
+thead th{background:#f8fafc;padding:9px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:2px solid var(--border);white-space:nowrap;position:sticky;top:0;user-select:none}
+thead th.sortable{cursor:pointer}
+thead th.sortable:hover{background:#f0f4f8;color:var(--pri2)}
+.sort-ind{font-size:10px;margin-left:3px;opacity:.4}
+.sort-ind.asc{opacity:1;color:var(--pri2)}
+.sort-ind.desc{opacity:1;color:var(--pri2)}
+.frow th{background:#fafff8;top:auto;position:relative;padding:5px 8px}
+.frow input,.frow select{width:100%;padding:4px 7px;border:1.5px solid var(--border);border-radius:6px;font-size:11px;background:#fff;min-width:0}
+.frow input:focus,.frow select:focus{outline:none;border-color:var(--pri2)}
+tbody td{padding:9px 11px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+tbody tr:hover td{background:#f8fafc}
+tbody tr:last-child td{border-bottom:none}
+.ei{border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;width:100%;min-width:80px;background:#fafffe;transition:border-color .2s}
+.ei:focus{outline:none;border-color:var(--pri2)}
+.esel{border:1.5px solid var(--border);border-radius:6px;padding:4px 6px;font-size:11px;background:#fafffe;cursor:pointer;width:100%}
+.esel:focus{outline:none;border-color:var(--pri2)}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.fbtn{padding:6px 13px;border-radius:20px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all .2s;white-space:nowrap}
+.fbtn:hover{border-color:var(--pri2);color:var(--pri2)}
+.fbtn.active{background:var(--pri2);border-color:var(--pri2);color:#fff}
+.tbtn-outline{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:8px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--text);transition:all .2s}
+.tbtn-outline:hover{border-color:var(--pri2);color:var(--pri2)}
+.si{padding:6px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;min-width:200px;background:#fff}
+.si:focus{outline:none;border-color:var(--pri2)}
+.sep{flex:1}
+
+/* ── MATRIX ── */
+.mx-wrap{overflow-x:auto;border-radius:12px;box-shadow:var(--sh)}
+.mx{border-collapse:collapse;background:#fff;font-size:11px;white-space:nowrap}
+.mx th{background:#f8fafc;padding:7px 8px;text-align:center;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);border:1px solid var(--border)}
+.mx th.gh{background:var(--pri);color:#fff;font-size:9px;text-align:center}
+.mx td{padding:5px 7px;border:1px solid var(--border);text-align:center;vertical-align:middle}
+.stk1{position:sticky;left:0;background:#fff;z-index:2;font-weight:700;text-align:left;min-width:110px;color:var(--pri)}
+.stk2{position:sticky;left:110px;background:#fff;z-index:2;text-align:left;min-width:90px}
+.mx tr:hover td{background:#fafffe}
+.mx tr:hover .stk1,.mx tr:hover .stk2{background:#fafffe}
+.fs-sel{border:1.5px solid var(--border);border-radius:4px;padding:2px 4px;font-size:10px;font-weight:700;min-width:52px;cursor:pointer;text-align:center}
+
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;align-items:center}
+.li{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600}
+
+/* ── COLUMN MANAGER ── */
+.col-panel{display:none;position:fixed;top:0;right:0;height:100%;width:280px;background:#fff;box-shadow:-4px 0 20px rgba(0,0,0,.15);z-index:400;overflow-y:auto;padding:20px}
+.col-panel.open{display:block}
+.col-panel h3{font-size:15px;font-weight:800;margin-bottom:4px}
+.col-panel p{font-size:12px;color:var(--muted);margin-bottom:16px}
+.col-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:#f8fafc;border:1.5px solid var(--border)}
+.col-item:hover{background:#f0f4f8}
+.col-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--pri2);cursor:pointer;flex-shrink:0}
+.col-item label{flex:1;font-size:12px;font-weight:600;cursor:pointer}
+.col-order-btns{display:flex;gap:3px}
+.cob{padding:3px 6px;border:1.5px solid var(--border);background:#fff;border-radius:5px;cursor:pointer;font-size:11px;color:var(--muted)}
+.cob:hover{border-color:var(--pri2);color:var(--pri2)}
+.cob:disabled{opacity:.3;cursor:not-allowed}
+.col-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1}
+.col-close:hover{color:var(--red)}
+
+/* ── MODALS ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:460px;width:90%;box-shadow:var(--shl)}
+.modal h3{font-size:18px;font-weight:800;margin-bottom:6px}
+.modal p{color:var(--muted);font-size:13px;margin-bottom:18px}
+.modal .fg{margin-bottom:14px}
+.merr{color:var(--red);font-size:12px;margin-bottom:10px;min-height:16px}
+.mact{display:flex;gap:10px;margin-top:6px}
+.btn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.btn-pri{background:var(--pri2);color:#fff}.btn-pri:hover{background:var(--pri)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#b91c1c}
+.btn-sec{background:var(--bg);color:var(--text)}.btn-sec:hover{background:var(--border)}
+.btn-teal{background:var(--teal);color:#fff}
+
+/* ── REPORTS ── */
+.rpt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.rpt-card{background:var(--card);border-radius:12px;padding:20px;box-shadow:var(--sh);border-top:4px solid}
+.rpt-card h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.rpt-card p{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6}
+.rpt-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;width:100%;transition:all .2s}
+.rpt-btn:hover{transform:translateY(-1px);box-shadow:var(--shm)}
+
+/* ── USER MGMT ── */
+.role-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase}
+.rp-admin{background:#fde68a;color:#92400e}
+.rp-editor{background:#bbf7d0;color:#14532d}
+.rp-viewer{background:#dbeafe;color:#1e40af}
+.act-btns{display:flex;gap:5px}
+.ab{padding:4px 10px;border-radius:6px;border:none;cursor:pointer;font-size:11px;font-weight:600;transition:all .2s}
+.ab-edit{background:#dbeafe;color:#1d4ed8}.ab-edit:hover{background:#bfdbfe}
+.ab-del{background:#fee2e2;color:#dc2626}.ab-del:hover{background:#fecaca}
+.ab-pwd{background:#fef3c7;color:#b45309}.ab-pwd:hover{background:#fde68a}
+
+/* ── NOTIF ── */
+.notif{display:none;position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:var(--shl);z-index:999}
+.notif.show{display:block;animation:fadeIn .2s ease}
+.notif-ok{background:var(--green);color:#fff}
+.notif-err{background:var(--red);color:#fff}
+
+/* ── SECTION HEADER ── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.stitle{font-size:15px;font-weight:700;display:flex;align-items:center;gap:7px}
+.scnt{color:var(--muted);font-size:12px;font-weight:500}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ LOGIN PAGE ════════════════ -->
+<div id="loginPage">
+  <div class="lcard">
+    <div class="llogo">AQ</div>
+    <div class="ltitle">ITSM QA Dashboard</div>
+    <div class="lsub">Aquera · HR to ITSM Integration Tracker</div>
+    <div class="fg">
+      <label class="fl">Username</label>
+      <input class="fi" type="text" id="lu" placeholder="Enter username" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('lp').focus()">
+    </div>
+    <div class="fg">
+      <label class="fl">Password</label>
+      <input class="fi" type="password" id="lp" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="lerr" id="lerr"></div>
+    <button class="lbtn" onclick="doLogin()">Sign In →</button>
+    <div class="lfooter">Secure · Internal Use Only · Aquera</div>
+  </div>
+</div>
+
+<!-- ════════════════ MAIN APP ════════════════ -->
+<div id="mainApp">
+  <header>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="hlogo">AQ</div>
+      <div><div class="htitle">ITSM QA Integration Dashboard</div><div class="hsub">HR → ITSM Integration Testing · Aquera QA</div></div>
+    </div>
+    <div class="hright">
+      <span class="hdate" id="hDate"></span>
+      <span id="syncPill" style="display:none;font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;letter-spacing:.3px;cursor:pointer" title="Click to test connection" onclick="testConnection()"></span>
+      <div class="user-pill">
+        <span id="hUserName">—</span>
+        <span class="role-tag" id="hRoleTag"></span>
+      </div>
+      <button class="hbtn" onclick="doLogout()">↩ Logout</button>
+    </div>
+  </header>
+
+  <div id="adminBar">🔓 ADMIN MODE — Full edit access enabled. All changes are live until you Save Dashboard.</div>
+
+  <div class="tabs-bar" id="tabsBar"></div>
+
+  <main>
+    <!-- JSONBIN SETUP BANNER — shown to admin only when not configured -->
+    <div id="setupBanner" style="display:none;background:linear-gradient(135deg,#fffbeb,#fef9e7);border:2px solid #f59e0b;border-radius:12px;margin-bottom:16px;padding:18px 20px">
+      <div style="font-size:14px;font-weight:800;color:#b45309;margin-bottom:8px">🔧 Sync Not Configured — Dashboard is running in Local Mode</div>
+      <div style="font-size:12px;color:#78350f;line-height:1.9">
+        To enable <strong>real-time sync</strong> so the whole team sees live data, set up JSONBin (free, ~3 min):<br>
+        <strong>1.</strong> Go to <a href="https://jsonbin.io" target="_blank" style="color:#d97706;font-weight:700">jsonbin.io</a> → Sign up (email only, no credit card) → log in<br>
+        <strong>2.</strong> Click <strong>Bins</strong> → <strong>Create Bin</strong> → type <code style="background:#fde68a;padding:1px 5px;border-radius:3px">{}</code> → click <strong>Save</strong> → copy the <strong>Bin ID</strong> from the URL bar<br>
+        <strong>3.</strong> Click your profile icon → <strong>API Keys</strong> → copy the <strong>Master Key</strong><br>
+        <strong>4.</strong> Open this file in Notepad → find <code style="background:#fde68a;padding:1px 5px;border-radius:3px">PASTE_BIN_ID</code> and <code style="background:#fde68a;padding:1px 5px;border-radius:3px">PASTE_API_KEY</code> → replace both → save → share the updated file with your team via SharePoint
+      </div>
+    </div>
+    <!-- DASHBOARD -->
+    <div class="tab-panel" id="tab-dashboard">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="grid2">
+        <div class="panel"><div class="ptitle">📈 By HR Source</div><div id="hrBars"></div></div>
+        <div class="panel"><div class="ptitle">🏢 By ITSM App</div><div id="itsmBars"></div></div>
+      </div>
+      <div class="panel"><div class="ptitle">📋 Status Breakdown</div><div id="statusSum"></div></div>
+    </div>
+
+    <!-- TRACKER -->
+    <div class="tab-panel" id="tab-tracker">
+      <div class="sh">
+        <div class="stitle">🔗 Integration Tracker <span class="scnt" id="trCnt"></span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input class="si" type="text" placeholder="🔍 Search…" oninput="search(this.value)" id="srch">
+          <button class="tbtn-outline" onclick="toggleFilters()" id="fltToggle">⚡ Filters</button>
+          <button class="tbtn-outline" onclick="openColPanel()">⚙️ Columns</button>
+          <button class="tbtn-outline" id="addRowBtn" onclick="addNewIntegration()" style="display:none">➕ Add Integration</button>
+        </div>
+      </div>
+      <div class="toolbar" id="quickFilters">
+        <button class="fbtn active" onclick="qf('all',this)">All</button>
+        <button class="fbtn" onclick="qf('Deployed to PROD',this)">✅ Deployed</button>
+        <button class="fbtn" onclick="qf('Under Testing',this)">🔬 Under Testing</button>
+        <button class="fbtn" onclick="qf('Test In Progress',this)">⚙️ Pre-Prod</button>
+        <button class="fbtn" onclick="qf('Ready for PROD',this)">🚀 Ready</button>
+        <button class="fbtn" onclick="qf('Blocked',this)">🚫 Blocked</button>
+      </div>
+      <div class="tbl-wrap">
+        <table id="trTable">
+          <thead id="trHead"></thead>
+          <tbody id="trBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FEATURE MATRIX -->
+    <div class="tab-panel" id="tab-matrix">
+      <div class="sh">
+        <div class="stitle">🧪 Feature Coverage Matrix</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--muted)">Per ITSM × HR Source combination</span>
+          <button class="tbtn-outline" id="addMxRowBtn" onclick="openAddMatrixRow()" style="display:none">➕ Add Row</button>
+        </div>
+      </div>
+      <div class="legend" id="mxLegend"></div>
+      <div class="mx-wrap"><table class="mx" id="mxTable"></table></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="tab-panel" id="tab-reports">
+      <div class="stitle" style="margin-bottom:16px">📄 Generate &amp; Export Reports</div>
+      <div class="rpt-grid" id="rptGrid"></div>
+    </div>
+
+    <!-- USER MANAGEMENT -->
+    <div class="tab-panel" id="tab-users">
+      <div class="sh">
+        <div class="stitle">👥 User Management</div>
+        <button class="btn btn-pri" onclick="openAddUser()">➕ Add User</button>
+      </div>
+      <div class="panel" style="margin-bottom:16px;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1.5px solid var(--border)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px">🔐 Role Permissions</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px">
+          <div style="flex:1;min-width:160px;background:#fff;border-radius:8px;padding:12px;border-left:3px solid #f59e0b">
+            <div style="font-weight:800;color:#92400e;margin-bottom:6px">👑 Admin</div>
+            Dashboard · Tracker (edit) · Feature Matrix (edit) · Reports · User Management · Column/Sort/Filter · Save Dashboard
+          </div>
+          <div style="flex:1;min-width:160px;background:#fff;border-radius:8px;padding:12px;border-left:3px solid #16a34a">
+            <div style="font-weight:800;color:#14532d;margin-bottom:6px">✏️ Editor</div>
+            Dashboard · Tracker (edit) · Feature Matrix (edit) · Reports (download) · Sort &amp; Filter
+          </div>
+          <div style="flex:1;min-width:160px;background:#fff;border-radius:8px;padding:12px;border-left:3px solid #2563eb">
+            <div style="font-weight:800;color:#1e40af;margin-bottom:6px">👁 Viewer</div>
+            Dashboard · Tracker (view only) · Feature Matrix (view only) · Reports (download)
+          </div>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table id="usrTable">
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Username</th><th>Role</th><th>Email</th><th>Created</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usrBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ── COLUMN MANAGER PANEL ── -->
+<div class="col-panel" id="colPanel">
+  <button class="col-close" onclick="closeColPanel()">✕</button>
+  <h3>⚙️ Columns</h3>
+  <p>Toggle visibility and reorder. Drag or use ▲▼ to reorder.</p>
+  <div id="colList"></div>
+  <div style="margin-top:16px;display:flex;gap:8px">
+    <button class="btn btn-pri" onclick="applyColConfig()">Apply</button>
+    <button class="btn btn-sec" onclick="resetCols()">Reset</button>
+  </div>
+</div>
+<div id="colOverlay" onclick="closeColPanel()" style="display:none;position:fixed;inset:0;z-index:399;background:rgba(0,0,0,.2)"></div>
+
+<!-- ── ADD/EDIT USER MODAL ── -->
+<div class="overlay" id="userModal">
+  <div class="modal">
+    <h3 id="umTitle">Add User</h3>
+    <p id="umSub">Fill in the details to create a new user account.</p>
+    <div class="fg"><label class="fl">Full Name</label><input class="fi" id="umName" placeholder="e.g. Jane Smith"></div>
+    <div class="fg"><label class="fl">Username</label><input class="fi" id="umUser" placeholder="e.g. jane.smith"></div>
+    <div class="fg"><label class="fl">Password</label><input class="fi" type="password" id="umPass" placeholder="Set password"></div>
+    <div class="fg"><label class="fl">Role</label>
+      <select class="fi" id="umRole">
+        <option value="admin">👑 Admin</option>
+        <option value="editor">✏️ Editor</option>
+        <option value="viewer" selected>👁 Viewer</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Email (optional)</label><input class="fi" id="umEmail" placeholder="user@company.com"></div>
+    <div class="merr" id="umErr"></div>
+    <div class="mact">
+      <button class="btn btn-pri" onclick="saveUser()">Save</button>
+      <button class="btn btn-sec" onclick="closeOverlay('userModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESET PASSWORD MODAL ── -->
+<div class="overlay" id="pwdModal">
+  <div class="modal">
+    <h3>🔑 Reset Password</h3>
+    <p id="pwdSub">Set a new password for this user.</p>
+    <div class="fg"><label class="fl">New Password</label><input class="fi" type="password" id="pwdNew" placeholder="New password"></div>
+    <div class="fg"><label class="fl">Confirm Password</label><input class="fi" type="password" id="pwdCon" placeholder="Confirm password" onkeydown="if(event.key==='Enter')savePassword()"></div>
+    <div class="merr" id="pwdErr"></div>
+    <div class="mact">
+      <button class="btn btn-pri" onclick="savePassword()">Update Password</button>
+      <button class="btn btn-sec" onclick="closeOverlay('pwdModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFIRM DELETE MODAL ── -->
+<div class="overlay" id="delModal">
+  <div class="modal">
+    <h3>⚠️ Delete User</h3>
+    <p id="delSub">This will permanently remove the user. This cannot be undone.</p>
+    <div class="mact">
+      <button class="btn btn-red" onclick="confirmDelete()">Delete</button>
+      <button class="btn btn-sec" onclick="closeOverlay('delModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── JIRA CONFIG MODAL ── -->
+<div class="overlay" id="jiraModal">
+  <div class="modal">
+    <h3>🔗 Configure JIRA Base URL</h3>
+    <p>Set the base URL for JIRA ticket links. Ticket IDs will be appended automatically.</p>
+    <div class="fg"><label class="fl">JIRA Base URL</label><input class="fi" id="jiraUrl" placeholder="https://company.atlassian.net/browse/"></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Example: https://aquera.atlassian.net/browse/ → links to INT-1435</div>
+    <div class="mact">
+      <button class="btn btn-pri" onclick="saveJiraUrl()">Save</button>
+      <button class="btn btn-sec" onclick="closeOverlay('jiraModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD MATRIX ROW MODAL ── -->
+<div class="overlay" id="mxModal">
+  <div class="modal">
+    <h3>➕ Add Feature Matrix Row</h3>
+    <p>Add a new ITSM × HR Source combination. All feature columns will start as Not Tested (⬜).</p>
+    <div class="fg">
+      <label class="fl">ITSM App</label>
+      <select class="fi" id="mxItsm">
+        <option value="">— Select ITSM App —</option>
+        <option>ServiceNow</option>
+        <option>JIRA SM</option>
+        <option>FreshService</option>
+        <option>ManageEngine SD</option>
+        <option>HaloITSM</option>
+        <option>Zendesk</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">HR Source</label>
+      <input class="fi" id="mxHrSource" placeholder="e.g. ADP WFN, Oracle HCM, Dayforce…">
+    </div>
+    <div class="fg">
+      <label class="fl">Ticket Types <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <input class="fi" id="mxTicketTypes" placeholder="e.g. Service Request, Task, Incident…">
+    </div>
+    <div class="merr" id="mxErr"></div>
+    <div class="mact">
+      <button class="btn btn-pri" onclick="saveMatrixRow()">➕ Add Row</button>
+      <button class="btn btn-sec" onclick="closeOverlay('mxModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── NOTIF ── -->
+<div class="notif notif-ok" id="notif"></div>
+
+<script>
+// ════════════════════════════════════════════════
+//  JSONBIN.IO CONFIG  (free — no credit card)
+//  Fill in JB_BIN_ID and JB_API_KEY below.
+//  Works from SharePoint, locally, or any URL.
+//  Setup takes ~3 minutes (see guide below).
+// ════════════════════════════════════════════════
+const JB_BIN_ID  = '6a783bfdf5f4af5e29fdefdd';
+const JB_API_KEY = '$2a$10$kWSnt6C81c86NV2/.QA2xeMIsZlrvV6EGCrTmoxrtVD4ffDZRS0.K';
+const JB_READY   = JB_BIN_ID !== 'PASTE_BIN_ID' && JB_API_KEY !== 'PASTE_API_KEY';
+const JB_URL     = `https://api.jsonbin.io/v3/b/${JB_BIN_ID}`;
+let _lastVersion = null;  // version from JSONBin to detect remote changes
+let _pollTimer   = null;
+let _lwc         = 0;     // local-write counter: suppresses poll re-renders during saves
+
+// ════════════════════════════════════════════════
+//  CONSTANTS
+// ════════════════════════════════════════════════
+const FS_LIST = [
+  {code:'P',   label:'Pass',           emoji:'✅', color:'#15803d', bg:'#dcfce7'},
+  {code:'F',   label:'Fail',           emoji:'❌', color:'#dc2626', bg:'#fee2e2'},
+  {code:'IP',  label:'In Progress',    emoji:'🔄', color:'#b45309', bg:'#fef3c7'},
+  {code:'NT',  label:'Not Tested',     emoji:'⬜', color:'#6b7280', bg:'#f3f4f6'},
+  {code:'IMPL',label:'Implemented',    emoji:'🔧', color:'#1d4ed8', bg:'#dbeafe'},
+  {code:'NI',  label:'Not Implemented',emoji:'⛔', color:'#475569', bg:'#f1f5f9'},
+  {code:'BL',  label:'Blocked',        emoji:'🚫', color:'#ea580c', bg:'#ffedd5'},
+  {code:'NA',  label:'N/A',            emoji:'➖', color:'#cbd5e1', bg:'#f8fafc'},
+];
+const INT_STATUSES = ['Received for Testing','Under Testing','Test In Progress (Pre-Prod)','Ready for PROD Deployment','Deployed to PROD','Under Dev – Blocked'];
+const FEAT_COLS = [
+  {group:'Pre-Hire',     cols:['When Detected','On Start Days','Before X Days','After X Date']},
+  {group:'Hire',         cols:['When Detected','On Start Days','Before X Days','After X Date']},
+  {group:'Change/Mover', cols:['When Detected','On Start Days','Before X Days','After X Date']},
+  {group:'Leave',        cols:['When Detected','On Start Days','Before X Days','After X Date']},
+  {group:'Terminate',    cols:['When Detected','On Start Days','Before X Days','After X Date']},
+  {group:'Rehire',       cols:['When Detected','On Start Days','Before X Days','After X Date']},
+  {group:'Common Fields',cols:['Custom Condition','Correlation','Auto Update','Auto Close','Attr Mapper','Email Notif','Slack/Teams','Report Mode','Src Filter(1)','Src Filter(N)','Incremental','Logging','Notifications','Log Insights','Reporting']},
+];
+
+// ════════════════════════════════════════════════
+//  DATA — USERS
+// ════════════════════════════════════════════════
+let users = [
+  {id:1, name:'Arjun Anto',  username:'arjun',   password:'Aquera@Admin2026', role:'admin',  email:'arjun.rajasekar@aquera.com', created:'2026-08-07'},
+  {id:2, name:'Editor User', username:'editor1',  password:'Editor@2026',      role:'editor', email:'', created:'2026-08-07'},
+  {id:3, name:'Viewer User', username:'viewer1',  password:'View@2026',        role:'viewer', email:'', created:'2026-08-07'},
+];
+let nextUserId = 4;
+
+// ════════════════════════════════════════════════
+//  DATA — CONFIG
+// ════════════════════════════════════════════════
+let cfg = {jiraBase:'https://aquera.atlassian.net/browse/'};
+
+// ════════════════════════════════════════════════
+//  DATA — INTEGRATIONS
+// ════════════════════════════════════════════════
+let integrations = [
+  {id:1,  customer:'Cherokee Nation',                           integration:'Oracle HCM to ServiceNow',                      hrSource:'Oracle HCM',      itsm:'ServiceNow',       status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1435',triggers:['Hire','Terminate','Leave','Mover','Rehire'],features:'Hire, Terminate, Leave, Move (Dept/Job/Manager), Rehire with event timing, Email & Teams, Log Insights, Logs, Report',notes:''},
+  {id:2,  customer:'NovaSource',                                integration:'ADP WFN to MESD',                               hrSource:'ADP WFN',         itsm:'ManageEngine SD',  status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1474',triggers:['Hire','Terminate'],features:'Hire (onboarding), Terminate (offboarding) with email notifications, Log Insights, Logs, Report',notes:''},
+  {id:3,  customer:'Anne Arundel Dermatology',                  integration:'ADP WFN to FreshService',                       hrSource:'ADP WFN',         itsm:'FreshService',     status:'Under Testing',               tester:'',received:'',signoff:'',jira:'INT-1523',triggers:['Hire','Terminate','Leave','Mover','Rehire'],features:'Hire, Terminate, Leave, Move (Dept/Job/Manager/Name/Location), Rehire, Email & Teams, Log Insights',notes:''},
+  {id:4,  customer:'Varo Energy',                               integration:'ServiceNow to AD',                              hrSource:'ServiceNow',      itsm:'Active Directory', status:'Ready for PROD Deployment',   tester:'',received:'',signoff:'',jira:'INT-1676',triggers:[],features:'External User Ticketing: Create, Update, Terminate + OU & Group. Expiry notification, extension automation',notes:''},
+  {id:5,  customer:'CFP Board',                                 integration:'JIRA to AD',                                    hrSource:'JIRA SM',         itsm:'Active Directory', status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1407',triggers:[],features:'Access Fulfilment',notes:''},
+  {id:6,  customer:'TextNow',                                   integration:'Jira to AD',                                    hrSource:'JIRA SM',         itsm:'Active Directory', status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1677',triggers:['Hire','Terminate'],features:'Onboarding/Offboarding + Access Fulfilment',notes:''},
+  {id:7,  customer:'ISC2',                                      integration:'JIRA to AD',                                    hrSource:'JIRA SM',         itsm:'Active Directory', status:'Under Testing',               tester:'',received:'',signoff:'',jira:'INT-1677',triggers:['Hire','Terminate'],features:'External Ticketing: Create, Update, Terminate, Onboarding, Naming Policy, Password Policy, OU Rules, Access Fulfilment',notes:''},
+  {id:8,  customer:'MAI Capital Management LLC',                integration:'ADP to Zendesk',                                hrSource:'ADP WFN',         itsm:'Zendesk',          status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1531',triggers:['Pre-Hire','Hire'],features:'Candidate lifecycle: create tickets, update when candidate → worker, seamless ticket tracking',notes:''},
+  {id:9,  customer:'MAI Capital Management LLC',                integration:'ADP to Zendesk (Re-Update Enhancement)',        hrSource:'ADP WFN',         itsm:'Zendesk',          status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1703',triggers:['Hire'],features:'Ticket Re-Update Enhancement: prevent unnecessary updates, duplicate ticket skip',notes:''},
+  {id:10, customer:'Inspira Financial Trust, LLC',              integration:'ADP Lyric HCM to FreshService',                 hrSource:'ADP Lyric HCM',   itsm:'FreshService',     status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1584',triggers:['Hire','Terminate'],features:'Hire + Terminate with ticket updates for Requests and Journey Requests. Auto ticket closure for offboarding',notes:''},
+  {id:11, customer:'Exalta',                                    integration:'ADP Workforce Now to HaloITSM',                 hrSource:'ADP WFN',         itsm:'HaloITSM',         status:'Ready for PROD Deployment',   tester:'',received:'',signoff:'',jira:'INT-1510',triggers:['Hire','Terminate','Rehire','Leave','Pre-Hire','Mover'],features:'All lifecycle events with ticket create/update/close. Slack & Teams notifications',notes:''},
+  {id:12, customer:'Goodwill Industries NW NC',                 integration:'UKG Pro to ServiceNow',                         hrSource:'UKG Pro',         itsm:'ServiceNow',       status:'Under Testing',               tester:'',received:'',signoff:'',jira:'INT-1569',triggers:['Hire','Terminate','Rehire'],features:'Hire, Terminate, Rehire with auto closure for Service Catalog & Incident. Slack & Teams',notes:''},
+  {id:13, customer:'Cherokee Nation Entertainment',             integration:'Oracle HCM Cloud to ServiceNow (ObjectSync)',   hrSource:'Oracle HCM',      itsm:'ServiceNow',       status:'Under Testing',               tester:'',received:'',signoff:'',jira:'INT-1644',triggers:[],features:'ObjectSync: Position, Location, Department, Company. Auto org data sync',notes:''},
+  {id:14, customer:'Community Financial Credit Union',          integration:'ADP WFN to Jira Service Management',            hrSource:'ADP WFN',         itsm:'JIRA SM',          status:'Test In Progress (Pre-Prod)', tester:'',received:'',signoff:'',jira:'INT-1579',triggers:['Hire','Terminate','Rehire','Leave','Pre-Hire','Mover'],features:'Joiner, Mover, Leaver, Rehire, Pre-Hire, Leave, Candidate tickets in JSM. All-in-one notifications',notes:''},
+  {id:15, customer:'Castle Biosciences',                        integration:'ADP WFN to Jira Service Management',            hrSource:'ADP WFN',         itsm:'JIRA SM',          status:'Test In Progress (Pre-Prod)', tester:'',received:'',signoff:'',jira:'INT-1617',triggers:['Hire','Terminate','Rehire','Leave','Pre-Hire','Mover'],features:'Joiner, Mover, Leaver, Rehire, Pre-Hire, Leave, Candidate tickets in JSM',notes:''},
+  {id:16, customer:'Axonius Federal Systems',                   integration:'ADP WFN to Jira Service Management',            hrSource:'ADP WFN',         itsm:'JIRA SM',          status:'Test In Progress (Pre-Prod)', tester:'',received:'',signoff:'',jira:'INT-1616',triggers:['Hire','Terminate','Rehire','Leave','Pre-Hire','Mover'],features:'Joiner, Mover, Leaver, Rehire, Pre-Hire, Leave, Candidate tickets in JSM',notes:''},
+  {id:17, customer:'American College of Cardiology',            integration:'Oracle Cloud HCM to Jira Service Management',   hrSource:'Oracle Cloud HCM',itsm:'JIRA SM',          status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1580',triggers:['Hire','Terminate','Mover'],features:'Joiner, Mover, Leaver in JSM. Object Sync: Dept, Location. Hire/termination dates via Jira Request Type',notes:''},
+  {id:18, customer:'Acron Avionics',                            integration:'ADP WFN to ServiceNow',                         hrSource:'ADP WFN',         itsm:'ServiceNow',       status:'Under Dev – Blocked',         tester:'',received:'',signoff:'',jira:'INT-1568',triggers:['Pre-Hire','Hire','Terminate','Rehire','Leave','Mover'],features:'JML Ticketing: all events, Teams/Slack/Email notifications',notes:'Blocked – under development'},
+  {id:19, customer:'TextNow Inc. / Vitu Inc.',                  integration:'Dayforce to Jira Service Management',           hrSource:'Dayforce',        itsm:'JIRA SM',          status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1525',triggers:['Hire','Terminate','Mover'],features:'Create Joiner, Mover, Leaver tickets in JSM',notes:''},
+  {id:20, customer:'Vitu, Inc.',                                integration:'ServiceNow to AD',                              hrSource:'ServiceNow',      itsm:'Active Directory', status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1525',triggers:['Hire','Terminate','Mover'],features:'Create Joiner, Mover, Leaver tickets in JSM',notes:''},
+  {id:21, customer:'MAI Capital Management LLC',                integration:'ADP to Zendesk (Candidate Enhancement)',        hrSource:'ADP WFN',         itsm:'Zendesk',          status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1531',triggers:['Hire','Pre-Hire'],features:'Update candidate tickets on conversion: Start Date, Employee Number, Title',notes:''},
+  {id:22, customer:'Text Now Inc.',                             integration:'Dayforce to JSM (Template Improvement)',        hrSource:'Dayforce',        itsm:'JIRA SM',          status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1456',triggers:['Hire','Terminate'],features:'Onboarding ticket on new Dayforce record (incl. future-dated). Offboarding ticket on termination',notes:''},
+  {id:23, customer:'Omni Hotels Management',                    integration:'Dayforce to Okta (OpenAPI v2.2.1)',              hrSource:'Dayforce',        itsm:'Okta',             status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1293',triggers:[],features:'TABLE key reference in custom conditions. Validated and deployed',notes:''},
+  {id:24, customer:'EOS Fitness',                               integration:'Entra ID to Zendesk',                           hrSource:'Entra ID',        itsm:'Zendesk',          status:'Deployed to PROD',            tester:'',received:'',signoff:'',jira:'INT-1622',triggers:[],features:'Organization Sync: All Licensed, All Active Licensed, custom conditions. Create, Update, Suspend',notes:''},
+  {id:25, customer:'Knowtion Health',                           integration:'UKG to Zendesk',                                hrSource:'UKG',             itsm:'Zendesk',          status:'Under Testing',               tester:'',received:'',signoff:'',jira:'',triggers:['Hire','Terminate'],features:'',notes:''},
+  {id:26, customer:'Thompson Gas',                              integration:'ADP to Zendesk',                                hrSource:'ADP WFN',         itsm:'Zendesk',          status:'Under Testing',               tester:'',received:'',signoff:'',jira:'',triggers:['Hire','Terminate'],features:'',notes:''},
+  {id:27, customer:'Lutheran Social Services',                  integration:'Dayforce to ManageEngine SD',                   hrSource:'Dayforce',        itsm:'ManageEngine SD',  status:'Under Testing',               tester:'',received:'',signoff:'',jira:'',triggers:['Hire','Terminate'],features:'',notes:''},
+  {id:28, customer:'Crane Worldwide',                           integration:'UKG Pro to JIRA SM',                            hrSource:'UKG Pro',         itsm:'JIRA SM',          status:'Under Testing',               tester:'',received:'',signoff:'',jira:'',triggers:['Hire','Terminate'],features:'',notes:''},
+  {id:29, customer:'Weokie Credit Union',                       integration:'ADP WFN to FreshService',                       hrSource:'ADP WFN',         itsm:'FreshService',     status:'Under Testing',               tester:'',received:'',signoff:'',jira:'',triggers:['Hire','Terminate'],features:'',notes:''},
+  {id:30, customer:'Langley Federal Credit Union',              integration:'UKG Pro to ServiceNow',                         hrSource:'UKG Pro',         itsm:'ServiceNow',       status:'Under Testing',               tester:'',received:'',signoff:'',jira:'INT-1569',triggers:['Hire','Terminate','Rehire'],features:'Hire, Terminate, Rehire with auto closure. Slack & Teams',notes:''},
+];
+let nextIntId = 31;
+let nextMxId = 19;
+
+// ════════════════════════════════════════════════
+//  DATA — FEATURE MATRIX
+// ════════════════════════════════════════════════
+let featureMatrix = [
+  {id:1, itsm:'ServiceNow',      hrSource:'Oracle HCM',    ticketTypes:'Request',                               data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','NT','NT','NT','P','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:2, itsm:'ServiceNow',      hrSource:'ADP WFN',       ticketTypes:'Journey Request',                       data:['NT','NT','NT','NT','P','P','P','P','F','F','F','F','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','P','F','NT','P','P','P','P']},
+  {id:3, itsm:'ServiceNow',      hrSource:'Dayforce',      ticketTypes:'Offboarding Request',                   data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','P','P','P','P','P','P','P','P','NT','NT','NT','NT','P','NT','NT','NT','P','F','NT','P','P','P','P']},
+  {id:4, itsm:'FreshService',    hrSource:'Oracle HCM',    ticketTypes:'Service Request',                       data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','P','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:5, itsm:'FreshService',    hrSource:'ADP WFN',       ticketTypes:'Task',                                  data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','P','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:6, itsm:'FreshService',    hrSource:'Dayforce',      ticketTypes:'Offboarding Request',                   data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','P','P','P','P','P','P','P','P','F','P','P','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:7, itsm:'JIRA SM',         hrSource:'Oracle HCM',    ticketTypes:'Service Catalog',                       data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:8, itsm:'JIRA SM',         hrSource:'ADP WFN',       ticketTypes:'Task',                                  data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:9, itsm:'JIRA SM',         hrSource:'Dayforce',      ticketTypes:'Task',                                  data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:10,itsm:'Zendesk',         hrSource:'Oracle HCM',    ticketTypes:'Incident',                              data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','P','P','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:11,itsm:'Zendesk',         hrSource:'ADP WFN',       ticketTypes:'Incident',                              data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','P','P','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:12,itsm:'Zendesk',         hrSource:'Dayforce',      ticketTypes:'Service Request',                       data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','P','P','P','P','P','P','P','P','F','P','P','P','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:13,itsm:'ManageEngine SD', hrSource:'Oracle HCM',    ticketTypes:'Service Request',                       data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:14,itsm:'ManageEngine SD', hrSource:'ADP WFN',       ticketTypes:'Change Request',                        data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:15,itsm:'ManageEngine SD', hrSource:'Dayforce',      ticketTypes:'Incident',                              data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:16,itsm:'HaloITSM',        hrSource:'Oracle HCM',    ticketTypes:'Advice',                                data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','NT','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:17,itsm:'HaloITSM',        hrSource:'ADP WFN',       ticketTypes:'Change Request',                        data:['NT','NT','NT','NT','P','P','P','P','F','F','F','F','P','P','P','P','NT','NT','NT','NT','P','P','P','P','F','NT','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:18,itsm:'HaloITSM',        hrSource:'Dayforce',      ticketTypes:'Problem',                               data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','NT','NT','NT','NT','NT','NT','NT','NT','F','NT','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+];
+
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+let currentUser = null;
+let activeTab = 'dashboard';
+let qFilter = 'all';
+let srchQ = '';
+let showFilters = false;
+let sortState = {col:null, dir:'asc'};
+let colFilters = {};
+let editingUserId = null;
+let deletingUserId = null;
+let pwdUserId = null;
+
+let colConfig = [
+  {id:'sno',        label:'#',                visible:true,  locked:true},
+  {id:'customer',   label:'Customer',          visible:true},
+  {id:'integration',label:'Integration',       visible:true},
+  {id:'hrSource',   label:'HR Source',         visible:true},
+  {id:'itsm',       label:'ITSM App',          visible:true},
+  {id:'status',     label:'Status',            visible:true},
+  {id:'tester',     label:'Tester',            visible:true},
+  {id:'received',   label:'Received Date',     visible:true},
+  {id:'signoff',    label:'Sign-off Date',     visible:true},
+  {id:'jira',       label:'JIRA Ticket',       visible:true},
+  {id:'triggers',   label:'Ticket Triggers',   visible:true},
+  {id:'features',   label:'Features',          visible:false},
+  {id:'notes',      label:'Notes / Blockers',  visible:true},
+];
+
+// ════════════════════════════════════════════════
+//  JSONBIN.IO — REAL-TIME SYNC
+//  Free CORS-enabled storage. Works from SharePoint, locally, anywhere.
+//  Polls every 8 s — updates appear within ~8 seconds for all users.
+// ════════════════════════════════════════════════
+function fbSync(state){
+  const el=document.getElementById('syncPill');if(!el)return;
+  const map={offline:{t:'📵 Local Only',bg:'#6b7280'},connecting:{t:'🔄 Connecting…',bg:'#d97706'},live:{t:'🟢 Live Sync',bg:'#16a34a'},saving:{t:'💾 Saving…',bg:'#2563eb'},error:{t:'⚠️ Sync Error',bg:'#dc2626'}};
+  const s=map[state]||map.live;
+  Object.assign(el.style,{display:'inline-block',background:s.bg,color:'#fff'});el.textContent=s.t;
+}
+function withLocalWrite(fn){_lwc++;fn();setTimeout(()=>{if(_lwc>0)_lwc--;},4000);}
+
+const LS_KEY='itsm_dash_local';
+function lsSave(state){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}}
+function lsLoad(){try{const s=localStorage.getItem(LS_KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
+function applyState(state){
+  if(Array.isArray(state.integrations))  integrations =state.integrations;
+  if(Array.isArray(state.featureMatrix)) featureMatrix=state.featureMatrix;
+  if(Array.isArray(state.users))         users        =state.users;
+  if(state.cfg)        cfg       =state.cfg;
+  if(state.nextIntId)  nextIntId =state.nextIntId;
+  if(state.nextMxId)   nextMxId  =state.nextMxId;
+  if(state.nextUserId) nextUserId=state.nextUserId;
+}
+
+async function spPush(){
+  fbSync('saving');
+  const state={integrations,featureMatrix,users,cfg,nextIntId,nextMxId,nextUserId,_ts:Date.now()};
+  // Always save locally first — instant, works offline
+  lsSave(state);
+  _lastVersion=state._ts;
+  if(!JB_READY){fbSync('offline');return;}
+  try{
+    const r=await fetch(JB_URL,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':JB_API_KEY,'X-Bin-Versioning':'false'},
+      body:JSON.stringify(state)
+    });
+    if(!r.ok){const msg=await r.text().catch(()=>'');throw new Error('PUT '+r.status+': '+msg);}
+    fbSync('live');
+  }catch(e){
+    console.error('spPush error:',e);
+    fbSync('error');
+    // Retry in 15 s
+    setTimeout(()=>spPush(),15000);
+  }
+}
+
+async function initSharePoint(){
+  if(!JB_READY){
+    fbSync('offline');
+    if(can('admin')){const b=document.getElementById('setupBanner');if(b)b.style.display='block';}
+    // Still load from localStorage so previous session data is shown
+    const local=lsLoad();
+    if(local){applyState(local);_lastVersion=local._ts||0;renderDashboard();if(activeTab==='tracker')renderTracker();if(activeTab==='matrix')renderMatrix();}
+    return;
+  }
+  fbSync('connecting');
+  try{
+    const r=await fetch(JB_URL,{headers:{'X-Master-Key':JB_API_KEY}});
+    if(!r.ok){throw new Error('GET '+r.status);}
+    const j=await r.json();
+    const state=j.record||{};
+    _lastVersion=state._ts||0;
+    if(!state.integrations){
+      // Bin was just created — push current data
+      await spPush();
+    }else{
+      applyState(state);
+      lsSave(state); // keep local copy in sync
+    }
+    fbSync('live');
+    renderDashboard();
+    if(activeTab==='tracker')renderTracker();
+    if(activeTab==='matrix')renderMatrix();
+    startPolling();
+  }catch(e){
+    console.error('initSharePoint error:',e);
+    fbSync('error');
+    // Load from localStorage as fallback so data isn't lost
+    const local=lsLoad();
+    if(local){
+      applyState(local);_lastVersion=local._ts||0;
+      renderDashboard();if(activeTab==='tracker')renderTracker();if(activeTab==='matrix')renderMatrix();
+      showNotif('⚠️ Offline — showing locally saved data. Changes will sync when connection restores.');
+    }
+    // Retry connection every 30 s
+    setTimeout(()=>initSharePoint(),30000);
+  }
+}
+function startPolling(){
+  if(_pollTimer)clearInterval(_pollTimer);
+  _pollTimer=setInterval(async()=>{
+    if(_lwc>0||!JB_READY)return;
+    try{
+      const r=await fetch(JB_URL,{headers:{'X-Master-Key':JB_API_KEY}});
+      if(!r.ok)return;
+      const j=await r.json();
+      const state=j.record||{};
+      const ts=state._ts||0;
+      if(ts===_lastVersion)return; // nothing changed
+      _lastVersion=ts;
+      if(Array.isArray(state.integrations)){integrations=state.integrations;renderDashboard();if(activeTab==='tracker')renderTracker();}
+      if(Array.isArray(state.featureMatrix)&&activeTab==='matrix'){featureMatrix=state.featureMatrix;renderMatrix();}
+      if(Array.isArray(state.users)&&activeTab==='users'){users=state.users;renderUsers();}
+      if(state.cfg)cfg=state.cfg;
+      if(state.nextIntId)nextIntId=state.nextIntId;
+      if(state.nextMxId)nextMxId=state.nextMxId;
+      if(state.nextUserId)nextUserId=state.nextUserId;
+      fbSync('live');
+      showNotif('🔄 Updated by another team member');
+    }catch(e){console.warn('poll:',e);}
+  },8000);
+}
+
+async function testConnection(){
+  if(!JB_READY){
+    alert('❌ NOT CONFIGURED\n\nJB_BIN_ID and JB_API_KEY are still set to the placeholder values.\n\nOpen the HTML file in Notepad, find PASTE_BIN_ID and PASTE_API_KEY, and replace them with your real values from jsonbin.io');
+    return;
+  }
+  const msg=['🔍 Testing JSONBin connection…\n','Bin ID: '+JB_BIN_ID.slice(0,8)+'…','API Key: '+JB_API_KEY.slice(0,10)+'…','URL: '+JB_URL,'\nRunning GET test…'];
+  try{
+    const r=await fetch(JB_URL,{headers:{'X-Master-Key':JB_API_KEY}});
+    if(r.ok){
+      const j=await r.json();
+      const ts=(j.record||{})._ts;
+      msg.push('\n✅ GET SUCCESS — bin is readable');
+      msg.push('Record has integrations: '+Array.isArray((j.record||{}).integrations));
+      msg.push('Last saved timestamp: '+(ts?new Date(ts).toLocaleString():'never (bin is empty)'));
+    }else{
+      const body=await r.text();
+      msg.push('\n❌ GET FAILED — HTTP '+r.status);
+      msg.push('Error: '+body.slice(0,200));
+      msg.push('\nCommon causes:\n• Wrong Bin ID (check the URL in jsonbin.io)\n• Wrong API Key (copy Master Key from API Keys tab)\n• Extra spaces/quotes around the values');
+    }
+  }catch(e){
+    msg.push('\n❌ NETWORK ERROR: '+e.message);
+    msg.push('This usually means CORS is blocked or no internet.');
+  }
+  alert(msg.join('\n'));
+}
+
+// ════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════
+function loginAs(user){
+  currentUser=user;
+  // Persist session so page refresh doesn't log out
+  try{sessionStorage.setItem('itsm_sess',JSON.stringify({u:user.username,p:user.password}));}catch(e){}
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  document.getElementById('hUserName').textContent=user.name;
+  const rt=document.getElementById('hRoleTag');
+  rt.textContent=user.role.toUpperCase();
+  rt.className='role-tag rt-'+user.role;
+  document.getElementById('hDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  if(user.role==='admin')document.getElementById('adminBar').classList.add('show');
+  buildTabs();
+  switchTab('dashboard');
+  renderDashboard();
+  renderReports();
+  initSharePoint();
+}
+function doLogin(){
+  const u=document.getElementById('lu').value.trim();
+  const p=document.getElementById('lp').value;
+  const user=users.find(x=>x.username===u&&x.password===p);
+  if(!user){document.getElementById('lerr').textContent='❌ Invalid username or password.';return;}
+  loginAs(user);
+}
+function doLogout(){
+  currentUser=null;
+  try{sessionStorage.removeItem('itsm_sess');}catch(e){}
+  if(_pollTimer){clearInterval(_pollTimer);_pollTimer=null;}
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('lu').value='';
+  document.getElementById('lp').value='';
+  document.getElementById('lerr').textContent='';
+  document.getElementById('adminBar').classList.remove('show');
+}
+function can(action){
+  if(!currentUser) return false;
+  const r = currentUser.role;
+  if(r==='admin') return true;
+  if(action==='edit') return r==='editor';
+  if(action==='view') return true;
+  return false;
+}
+
+// ════════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════════
+const TAB_DEF = [
+  {id:'dashboard', label:'📊 Dashboard',            roles:['admin','editor','viewer']},
+  {id:'tracker',   label:'🔗 Integration Tracker',  roles:['admin','editor','viewer']},
+  {id:'matrix',    label:'🧪 Feature Matrix',        roles:['admin','editor','viewer']},
+  {id:'reports',   label:'📄 Reports',               roles:['admin','editor','viewer']},
+  {id:'users',     label:'👥 User Management',       roles:['admin']},
+];
+function buildTabs(){
+  const bar = document.getElementById('tabsBar');
+  bar.innerHTML='';
+  TAB_DEF.filter(t=>t.roles.includes(currentUser.role)).forEach(t=>{
+    bar.innerHTML+=`<button class="tbtn" id="tb-${t.id}" onclick="switchTab('${t.id}')">${t.label}</button>`;
+  });
+  document.getElementById('addRowBtn').style.display = can('edit') ? 'flex' : 'none';
+  document.getElementById('addMxRowBtn').style.display = can('edit') ? 'flex' : 'none';
+}
+function switchTab(id){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+  const p = document.getElementById('tab-'+id);
+  const b = document.getElementById('tb-'+id);
+  if(p) p.classList.add('active');
+  if(b) b.classList.add('active');
+  activeTab = id;
+  if(id==='tracker')   renderTracker();
+  if(id==='matrix')    renderMatrix();
+  if(id==='users')     renderUsers();
+  if(id==='dashboard') renderDashboard();
+}
+
+// ════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtDate(d){if(!d)return '';try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch{return d;}}
+function statusCat(s){
+  if(s.includes('Deployed')) return 'dep';
+  if(s.includes('Ready'))    return 'ready';
+  if(s.includes('Pre-Prod')||s.includes('Test In Progress')) return 'pre';
+  if(s.includes('Under Testing')) return 'test';
+  if(s.includes('Blocked'))  return 'blk';
+  return 'other';
+}
+function statusBadge(s){
+  const m={dep:'bd',ready:'br',pre:'bp',test:'bt',blk:'bb',other:''};
+  const em={dep:'✅',ready:'🚀',pre:'⚙️',test:'🔬',blk:'🚫',other:''};
+  const cat=statusCat(s);
+  return `<span class="badge ${m[cat]}">${em[cat]} ${s}</span>`;
+}
+function fsBadge(code){
+  const n=code==='N/A'?'NA':(code||'NT');
+  const labels={P:'✅ Pass',F:'❌ Fail',IP:'🔄 In Prog',NT:'⬜ NT',IMPL:'🔧 Impl',NI:'⛔ Not Impl',BL:'🚫 Blocked',NA:'➖ N/A'};
+  return `<span class="fs fs-${n}">${labels[n]||n}</span>`;
+}
+function fsBg(c){const f=FS_LIST.find(x=>x.code===c);return f?f.bg:'#f3f4f6';}
+function fsCl(c){const f=FS_LIST.find(x=>x.code===c);return f?f.color:'#6b7280';}
+function jiraLink(jira){
+  if(!jira) return '<span style="color:#cbd5e1">—</span>';
+  return `<a href="${esc(cfg.jiraBase+jira)}" target="_blank" style="color:var(--pri2);font-weight:700;text-decoration:none;display:flex;align-items:center;gap:3px">${esc(jira)} <span style="font-size:10px">↗</span></a>`;
+}
+function triggerChips(arr){
+  const colors={'Hire':'#dcfce7:#15803d','Terminate':'#fee2e2:#dc2626','Rehire':'#dbeafe:#1d4ed8','Pre-Hire':'#ede9fe:#7c3aed','Leave':'#fef3c7:#b45309','Mover':'#ccfbf1:#0d9488'};
+  return (arr||[]).map(t=>{const [bg,fg]=(colors[t]||'#f3f4f6:#6b7280').split(':');return `<span style="background:${bg};color:${fg};padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;margin:1px;display:inline-block">${t}</span>`;}).join(' ');
+}
+function showNotif(msg, type='ok'){
+  const n=document.getElementById('notif');
+  n.textContent=msg; n.className=`notif notif-${type} show`;
+  setTimeout(()=>n.classList.remove('show'),2500);
+}
+
+// ════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════
+function getCounts(){
+  const c={total:integrations.length,dep:0,test:0,pre:0,ready:0,blk:0};
+  integrations.forEach(i=>{
+    const cat=statusCat(i.status);
+    if(cat==='dep') c.dep++; else if(cat==='test') c.test++;
+    else if(cat==='pre') c.pre++; else if(cat==='ready') c.ready++;
+    else if(cat==='blk') c.blk++;
+  });
+  return c;
+}
+function renderDashboard(){
+  const c=getCounts();
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-card sc-total"><div class="snum">${c.total}</div><div class="slbl">Total Integrations</div></div>
+    <div class="stat-card sc-dep"><div class="snum">${c.dep}</div><div class="slbl">Deployed to PROD</div></div>
+    <div class="stat-card sc-test"><div class="snum">${c.test}</div><div class="slbl">Under Testing</div></div>
+    <div class="stat-card sc-pre"><div class="snum">${c.pre}</div><div class="slbl">Pre-Prod Testing</div></div>
+    <div class="stat-card sc-ready"><div class="snum">${c.ready}</div><div class="slbl">Ready for PROD</div></div>
+    <div class="stat-card sc-blk"><div class="snum">${c.blk}</div><div class="slbl">Blocked</div></div>`;
+
+  const palette=['#2563eb','#16a34a','#7c3aed','#d97706','#0d9488','#dc2626','#6b7280','#ea580c','#0891b2','#db2777'];
+  function bars(groupFn, divId){
+    const g={};
+    integrations.forEach(i=>{const k=groupFn(i)||'Other';if(!g[k])g[k]={t:0,d:0};g[k].t++;if(statusCat(i.status)==='dep')g[k].d++;});
+    document.getElementById(divId).innerHTML=Object.entries(g).sort((a,b)=>b[1].t-a[1].t).map(([k,v],i)=>`
+      <div class="prow"><div class="plbl" title="${k}">${k}</div>
+      <div class="pbwrap"><div class="pbfill" style="width:${Math.round(v.d/v.t*100)}%;background:${palette[i%palette.length]}"></div></div>
+      <div class="pcnt">${v.t}</div></div>`).join('');
+  }
+  bars(i=>i.hrSource,'hrBars');
+  bars(i=>i.itsm,'itsmBars');
+
+  const sum=[
+    {l:'✅ Deployed to PROD',cnt:c.dep,bg:'#dcfce7',cl:'#15803d'},
+    {l:'🔬 Under Testing',cnt:c.test,bg:'#fef3c7',cl:'#b45309'},
+    {l:'⚙️ Pre-Prod Testing',cnt:c.pre,bg:'#ede9fe',cl:'#7c3aed'},
+    {l:'🚀 Ready for PROD',cnt:c.ready,bg:'#dbeafe',cl:'#1d4ed8'},
+    {l:'🚫 Blocked',cnt:c.blk,bg:'#fee2e2',cl:'#dc2626'},
+  ];
+  document.getElementById('statusSum').innerHTML='<div style="display:flex;gap:10px;flex-wrap:wrap">'+
+    sum.map(s=>`<div style="flex:1;min-width:150px;background:${s.bg};border-radius:10px;padding:14px 16px;border-left:4px solid ${s.cl}"><div style="font-size:22px;font-weight:900;color:${s.cl}">${s.cnt}</div><div style="font-size:11px;font-weight:700;color:${s.cl};margin-top:2px">${s.l}</div><div style="font-size:11px;color:${s.cl};opacity:.7">${Math.round(s.cnt/c.total*100)}% of total</div></div>`).join('')+'</div>';
+}
+
+// ════════════════════════════════════════════════
+//  TRACKER — SORT & FILTER
+// ════════════════════════════════════════════════
+function qf(v,btn){
+  qFilter=v;
+  document.querySelectorAll('#quickFilters .fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTracker();
+}
+function search(v){srchQ=v;renderTracker();}
+function toggleFilters(){
+  showFilters=!showFilters;
+  document.getElementById('fltToggle').classList.toggle('active',showFilters);
+  renderTracker();
+}
+function setSort(col){
+  if(sortState.col===col) sortState.dir=sortState.dir==='asc'?'desc':'asc';
+  else {sortState.col=col;sortState.dir='asc';}
+  renderTracker();
+}
+function setColFilter(id,val){colFilters[id]=val;renderTracker();}
+
+function getFilteredSorted(){
+  let rows=[...integrations];
+  // quick filter
+  if(qFilter!=='all') rows=rows.filter(i=>i.status.toLowerCase().includes(qFilter.toLowerCase()));
+  // search
+  if(srchQ){const q=srchQ.toLowerCase();rows=rows.filter(i=>['customer','integration','hrSource','itsm','tester','jira','notes'].some(f=>(i[f]||'').toLowerCase().includes(q)));}
+  // col filters
+  Object.entries(colFilters).forEach(([f,v])=>{
+    if(!v) return;
+    rows=rows.filter(i=>(String(i[f]||'').toLowerCase().includes(v.toLowerCase())));
+  });
+  // sort
+  if(sortState.col){
+    const col=sortState.col, dir=sortState.dir==='asc'?1:-1;
+    rows.sort((a,b)=>{
+      let av=a[col]||'', bv=b[col]||'';
+      if(typeof av==='number') return (av-bv)*dir;
+      return String(av).localeCompare(String(bv))*dir;
+    });
+  }
+  return rows;
+}
+
+// ════════════════════════════════════════════════
+//  TRACKER — RENDER
+// ════════════════════════════════════════════════
+function renderTracker(){
+  const visCols = colConfig.filter(c=>c.visible);
+  const rows = getFilteredSorted();
+  document.getElementById('trCnt').textContent=`(${rows.length} of ${integrations.length})`;
+
+  // Header
+  let headHtml='<tr>';
+  visCols.forEach(c=>{
+    const sortable=['customer','integration','hrSource','itsm','status','tester','received','signoff'].includes(c.id);
+    const isActive=sortState.col===c.id;
+    const ind = isActive?(sortState.dir==='asc'?'▲':'▼'):'⇅';
+    if(sortable){
+      headHtml+=`<th class="sortable" onclick="setSort('${c.id}')">${c.label} <span class="sort-ind${isActive?' '+sortState.dir:''}">${ind}</span></th>`;
+    } else {
+      headHtml+=`<th>${c.label}</th>`;
+    }
+  });
+  headHtml+='</tr>';
+
+  // Filter row
+  if(showFilters){
+    headHtml+='<tr class="frow">';
+    visCols.forEach(c=>{
+      const filterable=['customer','integration','hrSource','itsm','tester','jira','notes'].includes(c.id);
+      if(c.id==='status'){
+        const opts=['','Received for Testing','Under Testing','Test In Progress (Pre-Prod)','Ready for PROD Deployment','Deployed to PROD','Under Dev – Blocked']
+          .map(s=>`<option value="${s}" ${(colFilters[c.id]||'')==s?'selected':''}>${s||'All'}</option>`).join('');
+        headHtml+=`<th><select onchange="setColFilter('status',this.value)">${opts}</select></th>`;
+      } else if(filterable){
+        headHtml+=`<th><input type="text" placeholder="Filter…" value="${esc(colFilters[c.id]||'')}" oninput="setColFilter('${c.id}',this.value)"></th>`;
+      } else {
+        headHtml+='<th></th>';
+      }
+    });
+    headHtml+='</tr>';
+  }
+
+  document.getElementById('trHead').innerHTML=headHtml;
+
+  // Body
+  const canEdit = can('edit');
+  let bodyHtml='';
+  if(!rows.length){
+    bodyHtml=`<tr><td colspan="${visCols.length}" style="text-align:center;padding:30px;color:var(--muted)">No integrations match the current filter.</td></tr>`;
+  }
+  rows.forEach(int=>{
+    bodyHtml+='<tr>';
+    visCols.forEach(c=>{
+      bodyHtml+='<td>';
+      switch(c.id){
+        case 'sno': bodyHtml+=`<span style="font-weight:700;color:var(--muted)">${int.id}</span>`; break;
+        case 'customer':
+          bodyHtml += canEdit
+            ? `<input class="ei" value="${esc(int.customer)}" onchange="updInt(${int.id},'customer',this.value)" style="min-width:120px">`
+            : `<span style="font-weight:600">${esc(int.customer)}</span>`;
+          break;
+        case 'integration':
+          bodyHtml += canEdit
+            ? `<input class="ei" value="${esc(int.integration)}" onchange="updInt(${int.id},'integration',this.value)" style="min-width:150px">`
+            : esc(int.integration);
+          break;
+        case 'hrSource':
+          bodyHtml += canEdit
+            ? `<input class="ei" value="${esc(int.hrSource)}" onchange="updInt(${int.id},'hrSource',this.value)" style="min-width:90px">`
+            : esc(int.hrSource);
+          break;
+        case 'itsm':
+          bodyHtml += canEdit
+            ? `<input class="ei" value="${esc(int.itsm)}" onchange="updInt(${int.id},'itsm',this.value)" style="min-width:90px">`
+            : esc(int.itsm);
+          break;
+        case 'status':
+          bodyHtml += canEdit
+            ? `<select class="esel" onchange="updInt(${int.id},'status',this.value)" style="min-width:160px">${INT_STATUSES.map(s=>`<option value="${s}"${s===int.status?' selected':''}>${s}</option>`).join('')}</select>`
+            : statusBadge(int.status);
+          break;
+        case 'tester':
+          bodyHtml += canEdit
+            ? `<input class="ei" value="${esc(int.tester)}" placeholder="Assign…" onchange="updInt(${int.id},'tester',this.value)" style="min-width:100px">`
+            : (int.tester?`<span style="font-weight:600;color:var(--pri)">${esc(int.tester)}</span>`:'<span style="color:#cbd5e1;font-style:italic">Unassigned</span>');
+          break;
+        case 'received':
+          bodyHtml += canEdit
+            ? `<input class="ei" type="date" value="${int.received}" onchange="updInt(${int.id},'received',this.value)">`
+            : (int.received?fmtDate(int.received):'<span style="color:#cbd5e1">—</span>');
+          break;
+        case 'signoff':
+          bodyHtml += canEdit
+            ? `<input class="ei" type="date" value="${int.signoff}" onchange="updInt(${int.id},'signoff',this.value)">`
+            : (int.signoff?fmtDate(int.signoff):'<span style="color:#cbd5e1">—</span>');
+          break;
+        case 'jira':
+          bodyHtml += canEdit
+            ? `<input class="ei" value="${esc(int.jira)}" placeholder="INT-XXXX" onchange="updInt(${int.id},'jira',this.value)" style="min-width:90px">`
+            : jiraLink(int.jira);
+          break;
+        case 'triggers': bodyHtml += triggerChips(int.triggers)||'<span style="color:#cbd5e1">—</span>'; break;
+        case 'features':
+          bodyHtml += `<span style="font-size:11px;color:var(--muted);max-width:180px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(int.features)}">${int.features?int.features.substring(0,70)+(int.features.length>70?'…':''):'<span style="color:#cbd5e1">—</span>'}</span>`;
+          break;
+        case 'notes':
+          bodyHtml += canEdit
+            ? `<input class="ei" value="${esc(int.notes)}" placeholder="Blockers…" onchange="updInt(${int.id},'notes',this.value)" style="min-width:120px">`
+            : (int.notes?`<span style="color:var(--muted);font-style:italic;font-size:11px">${esc(int.notes)}</span>`:'<span style="color:#cbd5e1">—</span>');
+          break;
+        default: bodyHtml+='—';
+      }
+      bodyHtml+='</td>';
+    });
+    bodyHtml+='</tr>';
+  });
+  document.getElementById('trBody').innerHTML=bodyHtml;
+}
+
+function updInt(id,field,value){
+  const i=integrations.find(x=>x.id===id);
+  if(i){i[field]=value; if(field==='status'||field==='itsm'||field==='hrSource'){renderTracker();renderDashboard();}
+  withLocalWrite(()=>spPush());showNotif('✅ Saved');}
+}
+function addNewIntegration(){
+  const newInt={id:nextIntId++,customer:'New Customer',integration:'HR Source to ITSM',hrSource:'',itsm:'',status:'Received for Testing',tester:'',received:'',signoff:'',jira:'',triggers:[],features:'',notes:''};
+  integrations.unshift(newInt);
+  withLocalWrite(()=>spPush());
+  renderTracker();
+  showNotif('➕ New integration added — edit the row above');
+}
+
+// ════════════════════════════════════════════════
+//  COLUMN MANAGER
+// ════════════════════════════════════════════════
+function openColPanel(){
+  renderColList();
+  document.getElementById('colPanel').classList.add('open');
+  document.getElementById('colOverlay').style.display='block';
+}
+function closeColPanel(){
+  document.getElementById('colPanel').classList.remove('open');
+  document.getElementById('colOverlay').style.display='none';
+}
+function renderColList(){
+  document.getElementById('colList').innerHTML=colConfig.map((c,i)=>`
+    <div class="col-item">
+      <input type="checkbox" id="cc${i}" ${c.visible?'checked':''} ${c.locked?'disabled':''} onchange="colConfig[${i}].visible=this.checked">
+      <label for="cc${i}">${c.label}${c.locked?' 🔒':''}</label>
+      <div class="col-order-btns">
+        <button class="cob" onclick="moveCol(${i},-1)" ${i===0?'disabled':''}>▲</button>
+        <button class="cob" onclick="moveCol(${i},1)" ${i===colConfig.length-1?'disabled':''}>▼</button>
+      </div>
+    </div>`).join('');
+}
+function moveCol(i,dir){
+  const j=i+dir;
+  if(j<0||j>=colConfig.length) return;
+  [colConfig[i],colConfig[j]]=[colConfig[j],colConfig[i]];
+  renderColList();
+}
+function applyColConfig(){closeColPanel();renderTracker();}
+function resetCols(){
+  colConfig.forEach(c=>c.visible=true);
+  renderColList();
+  renderTracker();
+}
+
+// ════════════════════════════════════════════════
+//  FEATURE MATRIX
+// ════════════════════════════════════════════════
+function renderMatrix(){
+  const canEdit=can('edit');
+  document.getElementById('mxLegend').innerHTML='<strong style="font-size:10px;color:var(--muted);margin-right:4px">LEGEND:</strong>'+
+    FS_LIST.map(s=>`<div class="li"><span class="fs fs-${s.code}">${s.emoji} ${s.label}</span></div>`).join('');
+
+  const t=document.getElementById('mxTable');
+  let h='<thead><tr>';
+  h+=`<th class="stk1" rowspan="2" style="z-index:3;border:1px solid var(--border)">ITSM</th>`;
+  h+=`<th class="stk2" rowspan="2" style="z-index:3;border:1px solid var(--border)">HR Source</th>`;
+  FEAT_COLS.forEach(g=>h+=`<th colspan="${g.cols.length}" class="gh" style="border:1px solid rgba(255,255,255,.25)">${g.group}</th>`);
+  h+=`<th rowspan="2" class="gh" style="min-width:120px;border:1px solid rgba(255,255,255,.25)">Ticket Types</th>`;
+  h+='</tr><tr>';
+  FEAT_COLS.forEach(g=>g.cols.forEach(c=>h+=`<th style="min-width:55px;font-size:9px">${c}</th>`));
+  h+='</tr></thead><tbody>';
+
+  featureMatrix.forEach(row=>{
+    h+=`<tr><td class="stk1" style="background:#fff">${esc(row.itsm)}</td><td class="stk2" style="background:#fff">${esc(row.hrSource)}</td>`;
+    row.data.forEach((val,ci)=>{
+      const code=val==='N/A'?'NA':(val||'NT');
+      if(canEdit){
+        const opts=FS_LIST.map(s=>`<option value="${s.code}"${s.code===code?' selected':''}>${s.emoji} ${s.label}</option>`).join('');
+        h+=`<td><select class="fs-sel" onchange="updMx(${row.id},${ci},this.value)" style="background:${fsBg(code)};color:${fsCl(code)};border-color:${fsCl(code)}">${opts}</select></td>`;
+      } else {
+        h+=`<td>${fsBadge(code)}</td>`;
+      }
+    });
+    h+=`<td style="font-size:10px;font-weight:600;color:var(--pri2);text-align:left;padding:4px 8px">${esc(row.ticketTypes)||'—'}</td></tr>`;
+  });
+  t.innerHTML=h+'</tbody>';
+}
+function updMx(id,ci,val){
+  const r=featureMatrix.find(x=>x.id===id);
+  if(r){r.data[ci]=val;withLocalWrite(()=>spPush());showNotif('✅ Updated');}
+}
+function openAddMatrixRow(){
+  document.getElementById('mxItsm').value='';
+  document.getElementById('mxHrSource').value='';
+  document.getElementById('mxTicketTypes').value='';
+  document.getElementById('mxErr').textContent='';
+  document.getElementById('mxModal').classList.add('show');
+}
+function saveMatrixRow(){
+  const itsm=document.getElementById('mxItsm').value.trim();
+  const hr=document.getElementById('mxHrSource').value.trim();
+  const tt=document.getElementById('mxTicketTypes').value.trim();
+  const err=document.getElementById('mxErr');
+  if(!itsm){err.textContent='Please select an ITSM app.';return;}
+  if(!hr){err.textContent='HR Source is required.';return;}
+  const totalCols=FEAT_COLS.reduce((sum,g)=>sum+g.cols.length,0);
+  featureMatrix.push({id:nextMxId++,itsm,hrSource:hr,ticketTypes:tt,data:Array(totalCols).fill('NT')});
+  withLocalWrite(()=>spPush());
+  closeOverlay('mxModal');
+  renderMatrix();
+  showNotif('➕ Row added to Feature Matrix');
+}
+
+// ════════════════════════════════════════════════
+//  USER MANAGEMENT
+// ════════════════════════════════════════════════
+function renderUsers(){
+  const roleTag=r=>`<span class="role-pill rp-${r}">${{admin:'👑 Admin',editor:'✏️ Editor',viewer:'👁 Viewer'}[r]||r}</span>`;
+  document.getElementById('usrBody').innerHTML=users.map((u,i)=>`<tr>
+    <td style="font-weight:700;color:var(--muted)">${i+1}</td>
+    <td style="font-weight:600">${esc(u.name)}</td>
+    <td><code style="background:#f1f5f9;padding:2px 7px;border-radius:5px;font-size:12px">${esc(u.username)}</code></td>
+    <td>${roleTag(u.role)}</td>
+    <td style="color:var(--muted)">${esc(u.email)||'—'}</td>
+    <td style="color:var(--muted)">${u.created}</td>
+    <td><div class="act-btns">
+      <button class="ab ab-edit" onclick="openEditUser(${u.id})">✏️ Edit</button>
+      <button class="ab ab-pwd" onclick="openResetPwd(${u.id})">🔑 Password</button>
+      ${u.id===currentUser.id?'<span style="font-size:10px;color:#94a3b8;padding:4px 8px">You</span>':`<button class="ab ab-del" onclick="openDeleteUser(${u.id})">🗑 Delete</button>`}
+    </div></td>
+  </tr>`).join('');
+}
+function openAddUser(){
+  editingUserId=null;
+  document.getElementById('umTitle').textContent='➕ Add User';
+  document.getElementById('umSub').textContent='Create a new user account with a role.';
+  ['umName','umUser','umPass','umEmail'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('umRole').value='viewer';
+  document.getElementById('umErr').textContent='';
+  document.getElementById('userModal').classList.add('show');
+}
+function openEditUser(id){
+  editingUserId=id;
+  const u=users.find(x=>x.id===id);
+  document.getElementById('umTitle').textContent='✏️ Edit User';
+  document.getElementById('umSub').textContent='Update user details. Leave password blank to keep current.';
+  document.getElementById('umName').value=u.name;
+  document.getElementById('umUser').value=u.username;
+  document.getElementById('umPass').value='';
+  document.getElementById('umRole').value=u.role;
+  document.getElementById('umEmail').value=u.email;
+  document.getElementById('umErr').textContent='';
+  document.getElementById('userModal').classList.add('show');
+}
+function saveUser(){
+  const name=document.getElementById('umName').value.trim();
+  const username=document.getElementById('umUser').value.trim().toLowerCase();
+  const pass=document.getElementById('umPass').value;
+  const role=document.getElementById('umRole').value;
+  const email=document.getElementById('umEmail').value.trim();
+  const err=document.getElementById('umErr');
+  if(!name||!username){err.textContent='Name and username are required.';return;}
+  const dup=users.find(u=>u.username===username&&u.id!==editingUserId);
+  if(dup){err.textContent='Username already exists.';return;}
+  if(editingUserId){
+    const u=users.find(x=>x.id===editingUserId);
+    u.name=name;u.username=username;u.role=role;u.email=email;
+    if(pass) u.password=pass;
+  } else {
+    if(!pass){err.textContent='Password is required for new users.';return;}
+    users.push({id:nextUserId++,name,username,password:pass,role,email,created:new Date().toISOString().slice(0,10)});
+  }
+  closeOverlay('userModal');
+  withLocalWrite(()=>spPush());
+  renderUsers();
+  showNotif('✅ User saved');
+}
+function openResetPwd(id){
+  pwdUserId=id;
+  const u=users.find(x=>x.id===id);
+  document.getElementById('pwdSub').textContent=`Set a new password for ${u.name} (${u.username}).`;
+  document.getElementById('pwdNew').value='';document.getElementById('pwdCon').value='';
+  document.getElementById('pwdErr').textContent='';
+  document.getElementById('pwdModal').classList.add('show');
+}
+function savePassword(){
+  const p1=document.getElementById('pwdNew').value;
+  const p2=document.getElementById('pwdCon').value;
+  const err=document.getElementById('pwdErr');
+  if(!p1){err.textContent='Please enter a new password.';return;}
+  if(p1!==p2){err.textContent='Passwords do not match.';return;}
+  if(p1.length<6){err.textContent='Password must be at least 6 characters.';return;}
+  users.find(x=>x.id===pwdUserId).password=p1;
+  withLocalWrite(()=>spPush());
+  closeOverlay('pwdModal');
+  showNotif('🔑 Password updated');
+}
+function openDeleteUser(id){
+  deletingUserId=id;
+  const u=users.find(x=>x.id===id);
+  document.getElementById('delSub').textContent=`This will permanently delete "${u.name}" (${u.username}). This cannot be undone.`;
+  document.getElementById('delModal').classList.add('show');
+}
+function confirmDelete(){
+  users=users.filter(u=>u.id!==deletingUserId);
+  withLocalWrite(()=>spPush());
+  closeOverlay('delModal');
+  renderUsers();
+  showNotif('🗑 User deleted');
+}
+function closeOverlay(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');}));
+
+// ════════════════════════════════════════════════
+//  JIRA CONFIG
+// ════════════════════════════════════════════════
+function openJiraConfig(){
+  document.getElementById('jiraUrl').value=cfg.jiraBase;
+  document.getElementById('jiraModal').classList.add('show');
+}
+function saveJiraUrl(){
+  cfg.jiraBase=document.getElementById('jiraUrl').value.trim();
+  withLocalWrite(()=>spPush());
+  closeOverlay('jiraModal');
+  renderTracker();
+  showNotif('🔗 JIRA base URL updated');
+}
+
+// ════════════════════════════════════════════════
+//  REPORTS
+// ════════════════════════════════════════════════
+function renderReports(){
+  const rpts=[
+    {title:'📋 EOD Status Report',   border:'#2563eb', bg:'#eff6ff', desc:'End-of-day summary: current status, what is being tested, blockers, and ready-to-ship integrations. Share with leadership daily.',  btnCls:'background:#2563eb;color:#fff',  fn:'genEOD()'},
+    {title:'📊 Weekly Summary',       border:'#0d9488', bg:'#f0fdfa', desc:'7-day rollup: all integrations, progress by ITSM app, deliveries this week, and what is coming next. Ideal for weekly leadership.',   btnCls:'background:#0d9488;color:#fff',  fn:'genWeekly()'},
+    {title:'🚫 Blocked & At-Risk',    border:'#dc2626', bg:'#fff1f2', desc:'Report of all blocked and at-risk integrations with details. Use to escalate issues and show leadership what needs attention.',       btnCls:'background:#dc2626;color:#fff',  fn:'genBlocked()'},
+    {title:'👤 Tester Workload',       border:'#7c3aed', bg:'#f5f3ff', desc:'Shows how many integrations each tester is handling and their statuses. Useful for workload balancing and standup.',                 btnCls:'background:#7c3aed;color:#fff',  fn:'genTesterLoad()'},
+    {title:'🏢 ITSM Coverage Report', border:'#d97706', bg:'#fffbeb', desc:'Coverage across all ITSM apps: how many integrations per app, deployment rate, and which are still under testing.',                  btnCls:'background:#d97706;color:#fff',  fn:'genITSMCoverage()'},
+    {title:'💾 Download Backup',       border:'#16a34a', bg:'#f0fdf4', desc:'Download a point-in-time backup of the dashboard with current data embedded in the file. Live data is stored in SharePoint — use this for offline access or archiving.',        btnCls:'background:#16a34a;color:#fff',  fn:'saveDash()'},
+    {title:'📥 Export CSV',            border:'#64748b', bg:'#f8fafc', desc:'Export the Integration Tracker as a CSV file for use in Excel, Google Sheets, or any reporting tool.',                               btnCls:'background:#64748b;color:#fff',  fn:'exportCSV()'},
+    {title:'🔗 Configure JIRA URL',    border:'#0ea5e9', bg:'#f0f9ff', desc:`Current: <code style="background:#e0f2fe;padding:1px 5px;border-radius:3px;font-size:11px">${esc(cfg.jiraBase)}</code><br>Set your JIRA base URL so ticket IDs become clickable links.`, btnCls:'background:#0ea5e9;color:#fff', fn:'openJiraConfig()'},
+  ];
+  document.getElementById('rptGrid').innerHTML=rpts.map(r=>`
+    <div class="rpt-card" style="border-top-color:${r.border};background:${r.bg}">
+      <h3>${r.title}</h3>
+      <p>${r.desc}</p>
+      <button class="rpt-btn" style="${r.btnCls}" onclick="${r.fn}">⬇️ Generate / Open</button>
+    </div>`).join('');
+}
+
+function todayStr(){return new Date().toLocaleDateString('en-GB').replace(/\//g,'-');}
+function nowStr(){return new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+
+const RPT_CSS=`body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;margin:0;padding:20px;color:#1e293b}
+.container{max-width:960px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+.hdr{padding:26px 30px;color:#fff}.body{padding:26px 30px}
+.kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.kpi-c{flex:1;min-width:120px;padding:14px;border-radius:8px;text-align:center}
+.kpi-c .n{font-size:26px;font-weight:900}.kpi-c .l{font-size:10px;font-weight:700;text-transform:uppercase;margin-top:3px}
+h3{font-size:14px;font-weight:800;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid #e2e8f0}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px}
+th{background:#f8fafc;padding:8px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b;border-bottom:2px solid #e2e8f0}
+td{padding:8px 10px;border-bottom:1px solid #f1f5f9}tr:hover td{background:#fafffe}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.ft{background:#f8fafc;padding:14px 30px;text-align:center;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0}
+@media print{body{background:#fff}.container{box-shadow:none}}`;
+
+function sbd(s){const m={dep:'background:#dcfce7;color:#15803d',ready:'background:#dbeafe;color:#1d4ed8',pre:'background:#ede9fe;color:#7c3aed',test:'background:#fef3c7;color:#b45309',blk:'background:#fee2e2;color:#dc2626'};const cat=statusCat(s);return `<span class="badge" style="${m[cat]||''}">${s}</span>`;}
+
+function genEOD(){
+  const c=getCounts(), d=nowStr();
+  const inTest=integrations.filter(i=>['test','pre'].includes(statusCat(i.status)));
+  const ready=integrations.filter(i=>statusCat(i.status)==='ready');
+  const blk=integrations.filter(i=>statusCat(i.status)==='blk');
+  const dep=integrations.filter(i=>statusCat(i.status)==='dep');
+  let h=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EOD Report ${d}</title><style>${RPT_CSS}</style></head><body><div class="container">
+<div class="hdr" style="background:linear-gradient(135deg,#0f2441,#1e3a5f,#1d4ed8)"><h1 style="font-size:20px;margin:0 0 4px">📋 ITSM QA — End of Day Report</h1><p style="opacity:.75;margin:0;font-size:13px">Prepared by QA Team · ${d} · Aquera</p></div>
+<div class="body">
+<div class="kpi">
+<div class="kpi-c" style="background:#dcfce7"><div class="n" style="color:#15803d">${c.dep}</div><div class="l" style="color:#15803d">Deployed</div></div>
+<div class="kpi-c" style="background:#fef3c7"><div class="n" style="color:#b45309">${c.test}</div><div class="l" style="color:#b45309">Under Testing</div></div>
+<div class="kpi-c" style="background:#ede9fe"><div class="n" style="color:#7c3aed">${c.pre}</div><div class="l" style="color:#7c3aed">Pre-Prod</div></div>
+<div class="kpi-c" style="background:#dbeafe"><div class="n" style="color:#1d4ed8">${c.ready}</div><div class="l" style="color:#1d4ed8">Ready</div></div>
+<div class="kpi-c" style="background:#fee2e2"><div class="n" style="color:#dc2626">${c.blk}</div><div class="l" style="color:#dc2626">Blocked</div></div>
+</div>`;
+  if(inTest.length){h+=`<h3>🔬 Currently Under Testing (${inTest.length})</h3><table><tr><th>#</th><th>Customer</th><th>Integration</th><th>ITSM</th><th>Status</th><th>Tester</th><th>Notes</th></tr>`;inTest.forEach(i=>h+=`<tr><td>${i.id}</td><td style="font-weight:600">${i.customer}</td><td>${i.integration}</td><td>${i.itsm}</td><td>${sbd(i.status)}</td><td>${i.tester||'—'}</td><td style="color:#64748b;font-style:italic">${i.notes||'—'}</td></tr>`);h+='</table>';}
+  if(ready.length){h+=`<h3>🚀 Ready for PROD (${ready.length})</h3><table><tr><th>#</th><th>Customer</th><th>Integration</th><th>ITSM</th><th>Tester</th><th>JIRA</th></tr>`;ready.forEach(i=>h+=`<tr><td>${i.id}</td><td style="font-weight:600">${i.customer}</td><td>${i.integration}</td><td>${i.itsm}</td><td>${i.tester||'—'}</td><td>${i.jira||'—'}</td></tr>`);h+='</table>';}
+  if(blk.length){h+=`<h3>🚫 Blocked (${blk.length})</h3><table><tr><th>#</th><th>Customer</th><th>Integration</th><th>JIRA</th><th>Blocker</th></tr>`;blk.forEach(i=>h+=`<tr><td>${i.id}</td><td style="font-weight:600">${i.customer}</td><td>${i.integration}</td><td>${i.jira||'—'}</td><td style="color:#dc2626">${i.notes||'Under Dev – Blocked'}</td></tr>`);h+='</table>';}
+  h+=`<h3>✅ Delivered to PROD (${dep.length})</h3><table><tr><th>#</th><th>Customer</th><th>Integration</th><th>ITSM</th><th>JIRA</th></tr>`;
+  dep.slice(0,15).forEach(i=>h+=`<tr><td>${i.id}</td><td style="font-weight:600">${i.customer}</td><td>${i.integration}</td><td>${i.itsm}</td><td>${i.jira||'—'}</td></tr>`);
+  if(dep.length>15)h+=`<tr><td colspan="5" style="text-align:center;color:#64748b;font-style:italic">…and ${dep.length-15} more</td></tr>`;
+  h+=`</table></div><div class="ft">ITSM QA · Aquera · EOD Report · ${d}</div></div></body></html>`;
+  dl(`EOD_QA_${todayStr()}.html`,h);
+}
+
+function genWeekly(){
+  const c=getCounts(), d=nowStr();
+  let h=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Weekly QA Report</title><style>${RPT_CSS}</style></head><body><div class="container">
+<div class="hdr" style="background:linear-gradient(135deg,#0f2441,#0d9488)"><h1 style="font-size:20px;margin:0 0 4px">📊 ITSM QA — Weekly Status Report</h1><p style="opacity:.75;margin:0;font-size:13px">Week of ${d} · Aquera QA Team</p></div>
+<div class="body">
+<div class="kpi">
+<div class="kpi-c" style="background:#1e3a5f"><div class="n" style="color:#fff">${c.total}</div><div class="l" style="color:#fff">Total</div></div>
+<div class="kpi-c" style="background:#dcfce7"><div class="n" style="color:#15803d">${c.dep}</div><div class="l" style="color:#15803d">In PROD</div></div>
+<div class="kpi-c" style="background:#fef3c7"><div class="n" style="color:#b45309">${c.test+c.pre}</div><div class="l" style="color:#b45309">Active Testing</div></div>
+<div class="kpi-c" style="background:#dbeafe"><div class="n" style="color:#1d4ed8">${c.ready}</div><div class="l" style="color:#1d4ed8">Ready to Ship</div></div>
+<div class="kpi-c" style="background:#fee2e2"><div class="n" style="color:#dc2626">${c.blk}</div><div class="l" style="color:#dc2626">Needs Attention</div></div>
+</div>
+<h3>🔗 All Integrations</h3>
+<table><tr><th>#</th><th>Customer</th><th>Integration</th><th>HR</th><th>ITSM</th><th>Status</th><th>Tester</th><th>JIRA</th><th>Sign-off</th></tr>`;
+  integrations.forEach(i=>h+=`<tr><td>${i.id}</td><td style="font-weight:600">${i.customer}</td><td>${i.integration}</td><td>${i.hrSource}</td><td>${i.itsm}</td><td>${sbd(i.status)}</td><td>${i.tester||'—'}</td><td>${i.jira||'—'}</td><td>${i.signoff?fmtDate(i.signoff):'—'}</td></tr>`);
+  h+=`</table></div><div class="ft">ITSM QA · Aquera · Weekly Report · ${d}</div></div></body></html>`;
+  dl(`Weekly_QA_${todayStr()}.html`,h);
+}
+
+function genBlocked(){
+  const blk=integrations.filter(i=>['blk','test','pre'].includes(statusCat(i.status)));
+  const d=nowStr();
+  let h=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Blocked & At-Risk</title><style>${RPT_CSS}</style></head><body><div class="container">
+<div class="hdr" style="background:linear-gradient(135deg,#7f1d1d,#dc2626)"><h1 style="font-size:20px;margin:0 0 4px">🚫 Blocked &amp; At-Risk Integration Report</h1><p style="opacity:.75;margin:0;font-size:13px">${d} · Aquera QA</p></div>
+<div class="body">
+<h3>⚠️ Blocked / At-Risk Integrations (${blk.length})</h3>
+<table><tr><th>#</th><th>Customer</th><th>Integration</th><th>HR</th><th>ITSM</th><th>Status</th><th>Tester</th><th>JIRA</th><th>Received</th><th>Blocker / Notes</th></tr>`;
+  blk.forEach(i=>h+=`<tr><td>${i.id}</td><td style="font-weight:600">${i.customer}</td><td>${i.integration}</td><td>${i.hrSource}</td><td>${i.itsm}</td><td>${sbd(i.status)}</td><td>${i.tester||'—'}</td><td>${i.jira||'—'}</td><td>${i.received?fmtDate(i.received):'—'}</td><td style="color:#dc2626;font-style:italic">${i.notes||'No details'}</td></tr>`);
+  h+=`</table></div><div class="ft">ITSM QA · Aquera · Blocked Report · ${d}</div></div></body></html>`;
+  dl(`Blocked_Report_${todayStr()}.html`,h);
+}
+
+function genTesterLoad(){
+  const d=nowStr(), map={};
+  integrations.forEach(i=>{const k=i.tester||'Unassigned';if(!map[k])map[k]=[];map[k].push(i);});
+  let h=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Tester Workload</title><style>${RPT_CSS}</style></head><body><div class="container">
+<div class="hdr" style="background:linear-gradient(135deg,#4c1d95,#7c3aed)"><h1 style="font-size:20px;margin:0 0 4px">👤 Tester Workload Report</h1><p style="opacity:.75;margin:0;font-size:13px">${d} · Aquera QA</p></div>
+<div class="body">`;
+  Object.entries(map).sort((a,b)=>b[1].length-a[1].length).forEach(([name,rows])=>{
+    h+=`<h3>🧑‍💻 ${name} — ${rows.length} Integration${rows.length!==1?'s':''}</h3>
+<table><tr><th>#</th><th>Customer</th><th>Integration</th><th>ITSM</th><th>Status</th><th>JIRA</th></tr>`;
+    rows.forEach(i=>h+=`<tr><td>${i.id}</td><td style="font-weight:600">${i.customer}</td><td>${i.integration}</td><td>${i.itsm}</td><td>${sbd(i.status)}</td><td>${i.jira||'—'}</td></tr>`);
+    h+='</table>';
+  });
+  h+=`</div><div class="ft">ITSM QA · Aquera · Tester Workload · ${d}</div></div></body></html>`;
+  dl(`Tester_Workload_${todayStr()}.html`,h);
+}
+
+function genITSMCoverage(){
+  const d=nowStr(), map={};
+  integrations.forEach(i=>{const k=i.itsm||'Unknown';if(!map[k])map[k]={rows:[],dep:0};map[k].rows.push(i);if(statusCat(i.status)==='dep')map[k].dep++;});
+  let h=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ITSM Coverage</title><style>${RPT_CSS}</style></head><body><div class="container">
+<div class="hdr" style="background:linear-gradient(135deg,#0f2441,#d97706)"><h1 style="font-size:20px;margin:0 0 4px">🏢 ITSM Coverage Report</h1><p style="opacity:.75;margin:0;font-size:13px">${d} · Aquera QA</p></div>
+<div class="body">
+<h3>Coverage Summary</h3>
+<table><tr><th>ITSM App</th><th>Total</th><th>Deployed</th><th>Active Testing</th><th>Blocked</th><th>Deploy Rate</th></tr>`;
+  Object.entries(map).sort((a,b)=>b[1].rows.length-a[1].rows.length).forEach(([app,g])=>{
+    const act=g.rows.filter(i=>['test','pre'].includes(statusCat(i.status))).length;
+    const blk=g.rows.filter(i=>statusCat(i.status)==='blk').length;
+    h+=`<tr><td style="font-weight:700">${app}</td><td>${g.rows.length}</td><td style="color:#15803d;font-weight:700">${g.dep}</td><td style="color:#b45309">${act}</td><td style="color:#dc2626">${blk}</td><td>${Math.round(g.dep/g.rows.length*100)}%</td></tr>`;
+  });
+  h+=`</table>`;
+  Object.entries(map).sort((a,b)=>b[1].rows.length-a[1].rows.length).forEach(([app,g])=>{
+    h+=`<h3>🔗 ${app} (${g.rows.length})</h3><table><tr><th>#</th><th>Customer</th><th>Integration</th><th>Status</th><th>Tester</th></tr>`;
+    g.rows.forEach(i=>h+=`<tr><td>${i.id}</td><td style="font-weight:600">${i.customer}</td><td>${i.integration}</td><td>${sbd(i.status)}</td><td>${i.tester||'—'}</td></tr>`);
+    h+='</table>';
+  });
+  h+=`</div><div class="ft">ITSM QA · Aquera · ITSM Coverage · ${d}</div></div></body></html>`;
+  dl(`ITSM_Coverage_${todayStr()}.html`,h);
+}
+
+function exportCSV(){
+  const hdr=['ID','Customer','Integration','HR Source','ITSM App','Status','Tester','Received Date','Sign-off Date','JIRA Ticket','Ticket Triggers','Features','Notes'];
+  const rows=integrations.map(i=>[i.id,i.customer,i.integration,i.hrSource,i.itsm,i.status,i.tester,i.received,i.signoff,i.jira,(i.triggers||[]).join(';'),i.features,i.notes].map(v=>`"${String(v||'').replace(/"/g,'""')}"`));
+  dl(`ITSM_QA_Integrations_${todayStr()}.csv`,[hdr.join(','),...rows.map(r=>r.join(','))].join('\n'),'text/csv');
+}
+
+function saveDash(){
+  let html=document.documentElement.outerHTML;
+  const di=JSON.stringify(integrations), du=JSON.stringify(users), dm=JSON.stringify(featureMatrix), dc=JSON.stringify(cfg);
+  html=html.replace(/let integrations = \[[\s\S]*?\];/,'let integrations = '+di+';');
+  html=html.replace(/let users = \[[\s\S]*?\];/,'let users = '+du+';');
+  html=html.replace(/let featureMatrix = \[[\s\S]*?\];/,'let featureMatrix = '+dm+';');
+  html=html.replace(/let cfg = \{[\s\S]*?\};/,'let cfg = '+dc+';');
+  html=html.replace(/let nextIntId = \d+;/,'let nextIntId = '+nextIntId+';');
+  html=html.replace(/let nextMxId = \d+;/,'let nextMxId = '+nextMxId+';');
+  html=html.replace(/let nextUserId = \d+;/,'let nextUserId = '+nextUserId+';');
+  dl(`ITSM_QA_Dashboard_${todayStr()}.html`,'<!DOCTYPE html>'+html);
+  showNotif('💾 Backup downloaded — live data is in SharePoint.');
+}
+
+function dl(name,content,mime){
+  const blob=new Blob([content],{type:mime||'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=name;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+// ════════════════════════════════════════════════
+//  INIT — auto-login if session is saved
+// ════════════════════════════════════════════════
+(function(){
+  try{
+    const saved=sessionStorage.getItem('itsm_sess');
+    if(saved){
+      const {u,p}=JSON.parse(saved);
+      const user=users.find(x=>x.username===u&&x.password===p);
+      if(user){loginAs(user);return;}
+      sessionStorage.removeItem('itsm_sess');
+    }
+  }catch(e){}
+  document.getElementById('lu').focus();
+})();
+</script>
+</body>
+</html>
