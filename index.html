@@ -195,6 +195,25 @@ tbody tr:last-child td{border-bottom:none}
 .ab-del{background:#fee2e2;color:#dc2626}.ab-del:hover{background:#fecaca}
 .ab-pwd{background:#fef3c7;color:#b45309}.ab-pwd:hover{background:#fde68a}
 
+/* ── TRIGGER MULTI-SELECT ── */
+.trig-wrap{display:flex;flex-wrap:wrap;gap:2px;min-width:200px}
+.trig-lbl{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid #e2e8f0;background:#f1f5f9;color:#6b7280;transition:all .15s;user-select:none}
+.trig-lbl.active-hire{background:#dcfce7;color:#15803d;border-color:#15803d}
+.trig-lbl.active-terminate{background:#fee2e2;color:#dc2626;border-color:#dc2626}
+.trig-lbl.active-mover{background:#ccfbf1;color:#0d9488;border-color:#0d9488}
+.trig-lbl.active-leave{background:#fef3c7;color:#b45309;border-color:#b45309}
+.trig-lbl.active-rehire{background:#dbeafe;color:#1d4ed8;border-color:#1d4ed8}
+.trig-lbl.active-prehire{background:#ede9fe;color:#7c3aed;border-color:#7c3aed}
+.trig-all{background:var(--pri2);color:#fff;border:none;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:700;cursor:pointer}
+
+/* ── DIR FEATURE CHECKBOXES ── */
+.dfl-wrap{display:flex;flex-direction:column;gap:3px;min-width:160px}
+.dfl-lbl{display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer}
+
+/* ── DELETE ROW BUTTON ── */
+.ab-delrow{padding:3px 8px;border-radius:5px;border:none;cursor:pointer;font-size:10px;font-weight:700;background:#fee2e2;color:#dc2626;transition:all .2s}
+.ab-delrow:hover{background:#fecaca}
+
 /* ── NOTIF ── */
 .notif{display:none;position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:var(--shl);z-index:999}
 .notif.show{display:block;animation:fadeIn .2s ease}
@@ -273,44 +292,84 @@ tbody tr:last-child td{border-bottom:none}
       <div class="panel"><div class="ptitle">📋 Status Breakdown</div><div id="statusSum"></div></div>
     </div>
 
-    <!-- TRACKER -->
-    <div class="tab-panel" id="tab-tracker">
+    <!-- HR TO ITSM TRACKER -->
+    <div class="tab-panel" id="tab-hrtracker">
       <div class="sh">
-        <div class="stitle">🔗 Integration Tracker <span class="scnt" id="trCnt"></span></div>
+        <div class="stitle">🔗 HR to ITSM Tracker <span class="scnt" id="hrTrCnt"></span></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <input class="si" type="text" placeholder="🔍 Search…" oninput="search(this.value)" id="srch">
-          <button class="tbtn-outline" onclick="toggleFilters()" id="fltToggle">⚡ Filters</button>
-          <button class="tbtn-outline" onclick="openColPanel()">⚙️ Columns</button>
-          <button class="tbtn-outline" id="addRowBtn" onclick="addNewIntegration()" style="display:none">➕ Add Integration</button>
+          <input class="si" type="text" placeholder="🔍 Search…" oninput="hrSearch(this.value)" id="hrSrch">
+          <button class="tbtn-outline" onclick="toggleHrFilters()" id="hrFltToggle">⚡ Filters</button>
+          <button class="tbtn-outline" onclick="openColPanel('hr')">⚙️ Columns</button>
+          <button class="tbtn-outline" id="addRowBtn" onclick="addNewHrIntegration()" style="display:none">➕ Add Integration</button>
         </div>
       </div>
-      <div class="toolbar" id="quickFilters">
-        <button class="fbtn active" onclick="qf('all',this)">All</button>
-        <button class="fbtn" onclick="qf('Deployed to PROD',this)">✅ Deployed</button>
-        <button class="fbtn" onclick="qf('Under Testing',this)">🔬 Under Testing</button>
-        <button class="fbtn" onclick="qf('Test In Progress',this)">⚙️ Pre-Prod</button>
-        <button class="fbtn" onclick="qf('Ready for PROD',this)">🚀 Ready</button>
-        <button class="fbtn" onclick="qf('Blocked',this)">🚫 Blocked</button>
+      <div class="toolbar" id="hrQuickFilters">
+        <button class="fbtn active" onclick="hrQf('all',this)">All</button>
+        <button class="fbtn" onclick="hrQf('dep',this)">✅ Live / PROD</button>
+        <button class="fbtn" onclick="hrQf('pre',this)">⚙️ In Testing</button>
+        <button class="fbtn" onclick="hrQf('ready',this)">🚀 QA Approved</button>
+        <button class="fbtn" onclick="hrQf('blk',this)">🚫 Blocked</button>
+        <button class="fbtn" onclick="hrQf('test',this)">📋 Backlog/Dev</button>
       </div>
       <div class="tbl-wrap">
-        <table id="trTable">
-          <thead id="trHead"></thead>
-          <tbody id="trBody"></tbody>
+        <table id="hrTrTable">
+          <thead id="hrTrHead"></thead>
+          <tbody id="hrTrBody"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- FEATURE MATRIX -->
-    <div class="tab-panel" id="tab-matrix">
+    <!-- ITSM TO DIRECTORY TRACKER -->
+    <div class="tab-panel" id="tab-dirtracker">
       <div class="sh">
-        <div class="stitle">🧪 Feature Coverage Matrix</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <span style="font-size:11px;color:var(--muted)">Per ITSM × HR Source combination</span>
-          <button class="tbtn-outline" id="addMxRowBtn" onclick="openAddMatrixRow()" style="display:none">➕ Add Row</button>
+        <div class="stitle">🏢 ITSM to Directory Tracker <span class="scnt" id="dirTrCnt"></span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input class="si" type="text" placeholder="🔍 Search…" oninput="dirSearch(this.value)" id="dirSrch">
+          <button class="tbtn-outline" onclick="toggleDirFilters()" id="dirFltToggle">⚡ Filters</button>
+          <button class="tbtn-outline" onclick="openColPanel('dir')">⚙️ Columns</button>
+          <button class="tbtn-outline" id="addDirRowBtn" onclick="addNewDirIntegration()" style="display:none">➕ Add Integration</button>
         </div>
       </div>
-      <div class="legend" id="mxLegend"></div>
-      <div class="mx-wrap"><table class="mx" id="mxTable"></table></div>
+      <div class="toolbar" id="dirQuickFilters">
+        <button class="fbtn active" onclick="dirQf('all',this)">All</button>
+        <button class="fbtn" onclick="dirQf('dep',this)">✅ Live / PROD</button>
+        <button class="fbtn" onclick="dirQf('pre',this)">⚙️ In Testing</button>
+        <button class="fbtn" onclick="dirQf('ready',this)">🚀 QA Approved</button>
+        <button class="fbtn" onclick="dirQf('blk',this)">🚫 Blocked</button>
+        <button class="fbtn" onclick="dirQf('test',this)">📋 Backlog/Dev</button>
+      </div>
+      <div class="tbl-wrap">
+        <table id="dirTrTable">
+          <thead id="dirTrHead"></thead>
+          <tbody id="dirTrBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- HR TO ITSM FEATURE MATRIX -->
+    <div class="tab-panel" id="tab-hrmatrix">
+      <div class="sh">
+        <div class="stitle">🧪 HR to ITSM Feature Matrix</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--muted)">Per ITSM × HR Source combination</span>
+          <button class="tbtn-outline" id="addHrMxRowBtn" onclick="openAddHrMatrixRow()" style="display:none">➕ Add Row</button>
+        </div>
+      </div>
+      <div class="legend" id="hrMxLegend"></div>
+      <div class="mx-wrap"><table class="mx" id="hrMxTable"></table></div>
+    </div>
+
+    <!-- ITSM TO DIRECTORY FEATURE MATRIX -->
+    <div class="tab-panel" id="tab-dirmatrix">
+      <div class="sh">
+        <div class="stitle">🗂️ ITSM to Directory Feature Matrix</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--muted)">Per ITSM × Directory combination</span>
+          <button class="tbtn-outline" id="addDirMxRowBtn" onclick="openAddDirMatrixRow()" style="display:none">➕ Add Row</button>
+        </div>
+      </div>
+      <div class="legend" id="dirMxLegend"></div>
+      <div class="mx-wrap"><table class="mx" id="dirMxTable"></table></div>
     </div>
 
     <!-- REPORTS -->
@@ -411,8 +470,8 @@ tbody tr:last-child td{border-bottom:none}
 <!-- ── CONFIRM DELETE MODAL ── -->
 <div class="overlay" id="delModal">
   <div class="modal">
-    <h3>⚠️ Delete User</h3>
-    <p id="delSub">This will permanently remove the user. This cannot be undone.</p>
+    <h3 id="delTitle">⚠️ Delete Item</h3>
+    <p id="delSub">This will permanently remove the item. This cannot be undone.</p>
     <div class="mact">
       <button class="btn btn-red" onclick="confirmDelete()">Delete</button>
       <button class="btn btn-sec" onclick="closeOverlay('delModal')">Cancel</button>
@@ -434,35 +493,60 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- ── ADD MATRIX ROW MODAL ── -->
-<div class="overlay" id="mxModal">
+<!-- ── ADD HR MATRIX ROW MODAL ── -->
+<div class="overlay" id="hrMxModal">
   <div class="modal">
-    <h3>➕ Add Feature Matrix Row</h3>
+    <h3>➕ Add HR to ITSM Matrix Row</h3>
     <p>Add a new ITSM × HR Source combination. All feature columns will start as Not Tested (⬜).</p>
     <div class="fg">
       <label class="fl">ITSM App</label>
-      <select class="fi" id="mxItsm">
+      <select class="fi" id="hrMxItsm">
         <option value="">— Select ITSM App —</option>
-        <option>ServiceNow</option>
-        <option>JIRA SM</option>
-        <option>FreshService</option>
-        <option>ManageEngine SD</option>
-        <option>HaloITSM</option>
-        <option>Zendesk</option>
+        <option>ServiceNow</option><option>JIRA SM</option><option>FreshService</option>
+        <option>ManageEngine SD</option><option>HaloITSM</option><option>Zendesk</option>
       </select>
     </div>
     <div class="fg">
       <label class="fl">HR Source</label>
-      <input class="fi" id="mxHrSource" placeholder="e.g. ADP WFN, Oracle HCM, Dayforce…">
+      <input class="fi" id="hrMxHrSource" placeholder="e.g. ADP WFN, Oracle HCM, Dayforce…">
     </div>
     <div class="fg">
       <label class="fl">Ticket Types <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-      <input class="fi" id="mxTicketTypes" placeholder="e.g. Service Request, Task, Incident…">
+      <input class="fi" id="hrMxTicketTypes" placeholder="e.g. Service Request, Task, Incident…">
     </div>
-    <div class="merr" id="mxErr"></div>
+    <div class="merr" id="hrMxErr"></div>
     <div class="mact">
-      <button class="btn btn-pri" onclick="saveMatrixRow()">➕ Add Row</button>
-      <button class="btn btn-sec" onclick="closeOverlay('mxModal')">Cancel</button>
+      <button class="btn btn-pri" onclick="saveHrMatrixRow()">➕ Add Row</button>
+      <button class="btn btn-sec" onclick="closeOverlay('hrMxModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD DIR MATRIX ROW MODAL ── -->
+<div class="overlay" id="dirMxModal">
+  <div class="modal">
+    <h3>➕ Add ITSM→Directory Matrix Row</h3>
+    <p>Add a new ITSM × Directory combination. All feature columns will start as Not Tested (⬜).</p>
+    <div class="fg">
+      <label class="fl">ITSM Source</label>
+      <select class="fi" id="dirMxItsm">
+        <option value="">— Select ITSM Source —</option>
+        <option>ServiceNow</option><option>JIRA SM</option><option>FreshService</option>
+        <option>ManageEngine SD</option><option>HaloITSM</option><option>Zendesk</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">Directory Target</label>
+      <input class="fi" id="dirMxDirTarget" placeholder="e.g. Active Directory, Azure AD…">
+    </div>
+    <div class="fg">
+      <label class="fl">Ticket Types <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <input class="fi" id="dirMxTicketTypes" placeholder="e.g. Service Request, Incident…">
+    </div>
+    <div class="merr" id="dirMxErr"></div>
+    <div class="mact">
+      <button class="btn btn-pri" onclick="saveDirMatrixRow()">➕ Add Row</button>
+      <button class="btn btn-sec" onclick="closeOverlay('dirMxModal')">Cancel</button>
     </div>
   </div>
 </div>
@@ -490,25 +574,57 @@ let _lwc         = 0;   // local-write counter: suppresses SSE echoes during sav
 //  CONSTANTS
 // ════════════════════════════════════════════════
 const FS_LIST = [
-  {code:'P',   label:'Pass',           emoji:'✅', color:'#15803d', bg:'#dcfce7'},
-  {code:'F',   label:'Fail',           emoji:'❌', color:'#dc2626', bg:'#fee2e2'},
-  {code:'IP',  label:'In Progress',    emoji:'🔄', color:'#b45309', bg:'#fef3c7'},
-  {code:'NT',  label:'Not Tested',     emoji:'⬜', color:'#6b7280', bg:'#f3f4f6'},
-  {code:'IMPL',label:'Implemented',    emoji:'🔧', color:'#1d4ed8', bg:'#dbeafe'},
-  {code:'NI',  label:'Not Implemented',emoji:'⛔', color:'#475569', bg:'#f1f5f9'},
-  {code:'BL',  label:'Blocked',        emoji:'🚫', color:'#ea580c', bg:'#ffedd5'},
-  {code:'NA',  label:'N/A',            emoji:'➖', color:'#cbd5e1', bg:'#f8fafc'},
+  {code:'P',  label:'Pass',            emoji:'✅', color:'#15803d', bg:'#dcfce7'},
+  {code:'F',  label:'Fail',            emoji:'❌', color:'#dc2626', bg:'#fee2e2'},
+  {code:'IP', label:'Test In Progress',emoji:'🔄', color:'#b45309', bg:'#fef3c7'},
+  {code:'NT', label:'Not Tested',      emoji:'⬜', color:'#6b7280', bg:'#f3f4f6'},
+  {code:'NI', label:'Not Implemented', emoji:'⛔', color:'#475569', bg:'#f1f5f9'},
+  {code:'BL', label:'Blocked',         emoji:'🚫', color:'#ea580c', bg:'#ffedd5'},
+  {code:'NA', label:'N/A',             emoji:'➖', color:'#cbd5e1', bg:'#f8fafc'},
 ];
-const INT_STATUSES = ['Received for Testing','Under Testing','Test In Progress (Pre-Prod)','Ready for PROD Deployment','Deployed to PROD','Under Dev – Blocked'];
-const FEAT_COLS = [
-  {group:'Pre-Hire',     cols:['When Detected','On Start Days','Before X Days','After X Date']},
-  {group:'Hire',         cols:['When Detected','On Start Days','Before X Days','After X Date']},
-  {group:'Change/Mover', cols:['When Detected','On Start Days','Before X Days','After X Date']},
-  {group:'Leave',        cols:['When Detected','On Start Days','Before X Days','After X Date']},
-  {group:'Terminate',    cols:['When Detected','On Start Days','Before X Days','After X Date']},
-  {group:'Rehire',       cols:['When Detected','On Start Days','Before X Days','After X Date']},
-  {group:'Common Fields',cols:['Custom Condition','Correlation','Auto Update','Auto Close','Attr Mapper','Email Notif','Slack/Teams','Report Mode','Src Filter(1)','Src Filter(N)','Incremental','Logging','Notifications','Log Insights','Reporting']},
+const INT_STATUSES = [
+  'Backlog','Dev in Progress','Deployed to Test','Test in Progress','Blocked',
+  'QA Approved – Ready for PROD Deployment','Approval Pending','Review Pending',
+  'Deployed to PROD','PROD Regression','Live in PROD'
 ];
+const TRIGGER_OPTIONS = ['Hire','Terminate','Mover','Leave','Rehire','Pre-Hire'];
+const DIR_FEATURE_OPTS = ['External User Ticketing','External User Expiry Extension','Access Fulfilment'];
+
+const HR_FEAT_COLS = [
+  {group:'JML Lifecycle Events',   cols:['Hire','Terminate','Mover / Change','Leave','Rehire','Pre-Hire']},
+  {group:'Candidate Lifecycle',    cols:['Candidate Create','Candidate Terminate']},
+  {group:'Source Filters',         cols:['Employee Filter','Candidate Filter','Incremental Mode']},
+  {group:'Account Timing',         cols:['Onboard Timing','Offboard Timing','Time Zone Config']},
+  {group:'Service Desk (Tickets)', cols:['Ticket Creation','Custom Correlation','ITSM Group Assign','Asset Mgmt']},
+  {group:'ITSM User Lifecycle',    cols:['Create User','Update User','Terminate User','Early Hire','Time-Based Onboard','Time-Based Offboard','Termination Delay']},
+  {group:'Object Sync',            cols:['Object Sync']},
+  {group:'Notifications',          cols:['Email Notification','Chat / Teams']},
+  {group:'Logging',                cols:['Log Type','Log Level','Log Insights']},
+  {group:'Reporting',              cols:['Report Type','Report Level','Report Format']},
+  {group:'Attribute Mapping',      cols:['Attr Mapping']},
+  {group:'Custom Hooks',           cols:['Pre-Create','Post-Create','Pre-Update','Post-Update','Pre-Terminate','Post-Terminate']},
+  {group:'Operational',            cols:['Safeguard','Report Only Mode']},
+]; // 43 columns total
+
+const DIR_FEAT_COLS = [
+  {group:'Integration Modules',       cols:['JML Lifecycle','Ext. User Ticketing','Ext. User Expiry','Access Fulfilment','Manual Fulfilment','Asset Mgmt','Object Sync','ITSM User Lifecycle','Service Desk Bridge']},
+  {group:'Directory Provisioning',    cols:['Create Account','Update Account','Terminate Account','Early Hire','Time-Based Onboard','Time-Based Offboard','Termination Delay']},
+  {group:'Ext. User Ticketing',       cols:['Create Ticket','Auto Close','SD Group Assign']},
+  {group:'Expiry Extension',          cols:['Expiry Notification','Preset Durations','Extension Period','Create Ticket on Expiry','Approval Workflow','Auto Close After Ext.','Activate Mode','Disable Mode']},
+  {group:'Access Fulfilment',         cols:['Group','Application','Business Role','License','Manual Fulfilment','ITSM Ticket Source']},
+  {group:'Naming (Rules)',            cols:['Username Format']},
+  {group:'Password Policy',           cols:['Generate Password','Policy Selection']},
+  {group:'OU Assignment (Rules)',     cols:['Worker OU','Contact OU','Candidate OU']},
+  {group:'Group Assignment (Rules)',  cols:['Worker Group','Candidate Group']},
+  {group:'Writeback',                 cols:['Enable Writeback']},
+  {group:'Attribute Mapping',         cols:['Source → Target Mapping']},
+  {group:'Custom Correlation',        cols:['Enable Correlation','Correlation Method']},
+  {group:'Custom Hooks',              cols:['Pre-Create','Post-Create','Pre-Update','Post-Update','Pre-Terminate','Post-Terminate']},
+  {group:'Notifications',             cols:['Email Notification','Chat / Teams']},
+  {group:'Logging',                   cols:['Log Type','Log Level','Log Insights']},
+  {group:'Reporting',                 cols:['Report Type','Report Level','Report Format']},
+  {group:'Operational',               cols:['PII Mgmt','Safeguard','Source Filters']},
+]; // 62 columns total
 
 // ════════════════════════════════════════════════
 //  DATA — USERS
@@ -564,39 +680,67 @@ let nextIntId = 31;
 let nextMxId = 19;
 
 // ════════════════════════════════════════════════
-//  DATA — FEATURE MATRIX
+//  DATA — HR TO ITSM FEATURE MATRIX
+//  43 columns per HR_FEAT_COLS definition above.
+//  Existing data migrated; padded to 43 cols with NT.
 // ════════════════════════════════════════════════
+const _NT43 = Array(43).fill('NT');
 let featureMatrix = [
-  {id:1, itsm:'ServiceNow',      hrSource:'Oracle HCM',    ticketTypes:'Request',                               data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','NT','NT','NT','P','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:2, itsm:'ServiceNow',      hrSource:'ADP WFN',       ticketTypes:'Journey Request',                       data:['NT','NT','NT','NT','P','P','P','P','F','F','F','F','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','NT','P','F','NT','P','P','P','P']},
-  {id:3, itsm:'ServiceNow',      hrSource:'Dayforce',      ticketTypes:'Offboarding Request',                   data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','P','P','P','P','P','P','P','P','NT','NT','NT','NT','P','NT','NT','NT','P','F','NT','P','P','P','P']},
-  {id:4, itsm:'FreshService',    hrSource:'Oracle HCM',    ticketTypes:'Service Request',                       data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','P','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:5, itsm:'FreshService',    hrSource:'ADP WFN',       ticketTypes:'Task',                                  data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','P','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:6, itsm:'FreshService',    hrSource:'Dayforce',      ticketTypes:'Offboarding Request',                   data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','P','P','P','P','P','P','P','P','F','P','P','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:7, itsm:'JIRA SM',         hrSource:'Oracle HCM',    ticketTypes:'Service Catalog',                       data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:8, itsm:'JIRA SM',         hrSource:'ADP WFN',       ticketTypes:'Task',                                  data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:9, itsm:'JIRA SM',         hrSource:'Dayforce',      ticketTypes:'Task',                                  data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:10,itsm:'Zendesk',         hrSource:'Oracle HCM',    ticketTypes:'Incident',                              data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','P','P','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:11,itsm:'Zendesk',         hrSource:'ADP WFN',       ticketTypes:'Incident',                              data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','P','P','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:12,itsm:'Zendesk',         hrSource:'Dayforce',      ticketTypes:'Service Request',                       data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','P','P','P','P','P','P','P','P','F','P','P','P','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:13,itsm:'ManageEngine SD', hrSource:'Oracle HCM',    ticketTypes:'Service Request',                       data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:14,itsm:'ManageEngine SD', hrSource:'ADP WFN',       ticketTypes:'Change Request',                        data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:15,itsm:'ManageEngine SD', hrSource:'Dayforce',      ticketTypes:'Incident',                              data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','P','P','P','P','P','P','P','P','F','P','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:16,itsm:'HaloITSM',        hrSource:'Oracle HCM',    ticketTypes:'Advice',                                data:['NT','NT','NT','NT','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','P','F','NT','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:17,itsm:'HaloITSM',        hrSource:'ADP WFN',       ticketTypes:'Change Request',                        data:['NT','NT','NT','NT','P','P','P','P','F','F','F','F','P','P','P','P','NT','NT','NT','NT','P','P','P','P','F','NT','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
-  {id:18,itsm:'HaloITSM',        hrSource:'Dayforce',      ticketTypes:'Problem',                               data:['NT','NT','NT','NT','P','P','P','P','NA','NA','NA','NA','NA','NA','NA','NA','NT','NT','NT','NT','NT','NT','NT','NT','F','NT','F','F','P','P','P','NT','P','F','NT','P','P','P','P']},
+  {id:1,  itsm:'ServiceNow',      hrSource:'Oracle HCM',    ticketTypes:'Request',           data:[..._NT43]},
+  {id:2,  itsm:'ServiceNow',      hrSource:'ADP WFN',       ticketTypes:'Journey Request',   data:[..._NT43]},
+  {id:3,  itsm:'ServiceNow',      hrSource:'Dayforce',      ticketTypes:'Offboarding Req.',  data:[..._NT43]},
+  {id:4,  itsm:'FreshService',    hrSource:'Oracle HCM',    ticketTypes:'Service Request',   data:[..._NT43]},
+  {id:5,  itsm:'FreshService',    hrSource:'ADP WFN',       ticketTypes:'Task',              data:[..._NT43]},
+  {id:6,  itsm:'FreshService',    hrSource:'Dayforce',      ticketTypes:'Offboarding Req.',  data:[..._NT43]},
+  {id:7,  itsm:'JIRA SM',         hrSource:'Oracle HCM',    ticketTypes:'Service Catalog',   data:[..._NT43]},
+  {id:8,  itsm:'JIRA SM',         hrSource:'ADP WFN',       ticketTypes:'Task',              data:[..._NT43]},
+  {id:9,  itsm:'JIRA SM',         hrSource:'Dayforce',      ticketTypes:'Task',              data:[..._NT43]},
+  {id:10, itsm:'Zendesk',         hrSource:'Oracle HCM',    ticketTypes:'Incident',          data:[..._NT43]},
+  {id:11, itsm:'Zendesk',         hrSource:'ADP WFN',       ticketTypes:'Incident',          data:[..._NT43]},
+  {id:12, itsm:'Zendesk',         hrSource:'Dayforce',      ticketTypes:'Service Request',   data:[..._NT43]},
+  {id:13, itsm:'ManageEngine SD', hrSource:'Oracle HCM',    ticketTypes:'Service Request',   data:[..._NT43]},
+  {id:14, itsm:'ManageEngine SD', hrSource:'ADP WFN',       ticketTypes:'Change Request',    data:[..._NT43]},
+  {id:15, itsm:'ManageEngine SD', hrSource:'Dayforce',      ticketTypes:'Incident',          data:[..._NT43]},
+  {id:16, itsm:'HaloITSM',        hrSource:'Oracle HCM',    ticketTypes:'Advice',            data:[..._NT43]},
+  {id:17, itsm:'HaloITSM',        hrSource:'ADP WFN',       ticketTypes:'Change Request',    data:[..._NT43]},
+  {id:18, itsm:'HaloITSM',        hrSource:'Dayforce',      ticketTypes:'Problem',           data:[..._NT43]},
 ];
+
+// ════════════════════════════════════════════════
+//  DATA — ITSM TO DIRECTORY INTEGRATIONS
+// ════════════════════════════════════════════════
+let dirIntegrations = [];
+let nextDirIntId = 1;
+
+// ════════════════════════════════════════════════
+//  DATA — ITSM TO DIRECTORY FEATURE MATRIX
+// ════════════════════════════════════════════════
+let dirFeatureMatrix = [];
+let nextDirMxId = 1;
 
 // ════════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════════
 let currentUser = null;
 let activeTab = 'dashboard';
-let qFilter = 'all';
-let srchQ = '';
-let showFilters = false;
-let sortState = {col:null, dir:'asc'};
-let colFilters = {};
+let deletePending = null;
+
+// HR tracker state
+let hrQFilter = 'all';
+let hrSrchQ = '';
+let hrShowFilters = false;
+let hrSortState = {col:null, dir:'asc'};
+let hrColFilters = {};
+
+// Dir tracker state
+let dirQFilter = 'all';
+let dirSrchQ = '';
+let dirShowFilters = false;
+let dirSortState = {col:null, dir:'asc'};
+let dirColFilters = {};
+
+// Active col panel context
+let activeColPanelType = 'hr';
 let editingUserId = null;
 let deletingUserId = null;
 let pwdUserId = null;
@@ -615,6 +759,20 @@ let colConfig = [
   {id:'triggers',   label:'Ticket Triggers',   visible:true},
   {id:'features',   label:'Features',          visible:false},
   {id:'notes',      label:'Notes / Blockers',  visible:true},
+];
+let dirColConfig = [
+  {id:'sno',        label:'#',                 visible:true, locked:true},
+  {id:'customer',   label:'Customer',           visible:true},
+  {id:'integration',label:'Integration',        visible:true},
+  {id:'itsmSource', label:'ITSM Source',        visible:true},
+  {id:'dirTarget',  label:'Directory Target',   visible:true},
+  {id:'status',     label:'Status',             visible:true},
+  {id:'tester',     label:'Tester',             visible:true},
+  {id:'received',   label:'Received Date',      visible:true},
+  {id:'signoff',    label:'Sign-off Date',       visible:true},
+  {id:'jira',       label:'JIRA Ticket',        visible:true},
+  {id:'features',   label:'Features',           visible:true},
+  {id:'notes',      label:'Notes / Blockers',   visible:true},
 ];
 
 // ════════════════════════════════════════════════
@@ -636,17 +794,35 @@ function lsSave(state){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}c
 function lsLoad(){try{const s=localStorage.getItem(LS_KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
 function applyState(state){
   if(Array.isArray(state.integrations))  integrations =state.integrations;
-  if(Array.isArray(state.featureMatrix)) featureMatrix=state.featureMatrix;
+  if(Array.isArray(state.featureMatrix)){
+    const hrCols=HR_FEAT_COLS.reduce((s,g)=>s+g.cols.length,0);
+    featureMatrix=state.featureMatrix.map(r=>{
+      const d=Array.isArray(r.data)?[...r.data]:[];
+      while(d.length<hrCols)d.push('NT');
+      return {...r,data:d};
+    });
+  }
+  if(Array.isArray(state.dirIntegrations)) dirIntegrations=state.dirIntegrations;
+  if(Array.isArray(state.dirFeatureMatrix)){
+    const dirCols=DIR_FEAT_COLS.reduce((s,g)=>s+g.cols.length,0);
+    dirFeatureMatrix=state.dirFeatureMatrix.map(r=>{
+      const d=Array.isArray(r.data)?[...r.data]:[];
+      while(d.length<dirCols)d.push('NT');
+      return {...r,data:d};
+    });
+  }
   if(Array.isArray(state.users))         users        =state.users;
-  if(state.cfg)        cfg       =state.cfg;
-  if(state.nextIntId)  nextIntId =state.nextIntId;
-  if(state.nextMxId)   nextMxId  =state.nextMxId;
-  if(state.nextUserId) nextUserId=state.nextUserId;
+  if(state.cfg)           cfg          =state.cfg;
+  if(state.nextIntId)     nextIntId    =state.nextIntId;
+  if(state.nextMxId)      nextMxId     =state.nextMxId;
+  if(state.nextUserId)    nextUserId   =state.nextUserId;
+  if(state.nextDirIntId)  nextDirIntId =state.nextDirIntId;
+  if(state.nextDirMxId)   nextDirMxId  =state.nextDirMxId;
 }
 
 async function spPush(){
   fbSync('saving');
-  const state={integrations,featureMatrix,users,cfg,nextIntId,nextMxId,nextUserId,_ts:Date.now()};
+  const state={integrations,featureMatrix,dirIntegrations,dirFeatureMatrix,users,cfg,nextIntId,nextMxId,nextDirIntId,nextDirMxId,nextUserId,_ts:Date.now()};
   lsSave(state);
   _lastTs=state._ts;
   if(!FB_READY){fbSync('offline');return;}
@@ -670,7 +846,7 @@ async function initSharePoint(){
     fbSync('offline');
     if(can('admin')){const b=document.getElementById('setupBanner');if(b)b.style.display='block';}
     const local=lsLoad();
-    if(local){applyState(local);_lastTs=local._ts||0;renderDashboard();if(activeTab==='tracker')renderTracker();if(activeTab==='matrix')renderMatrix();}
+    if(local){applyState(local);_lastTs=local._ts||0;renderDashboard();refreshCurrentTab();}
     return;
   }
   fbSync('connecting');
@@ -688,8 +864,7 @@ async function initSharePoint(){
     }
     fbSync('live');
     renderDashboard();
-    if(activeTab==='tracker')renderTracker();
-    if(activeTab==='matrix')renderMatrix();
+    refreshCurrentTab();
     startRealtimeListener();
   }catch(e){
     console.error('initSharePoint error:',e);
@@ -697,7 +872,7 @@ async function initSharePoint(){
     const local=lsLoad();
     if(local){
       applyState(local);_lastTs=local._ts||0;
-      renderDashboard();if(activeTab==='tracker')renderTracker();if(activeTab==='matrix')renderMatrix();
+      renderDashboard();refreshCurrentTab();
       showNotif('⚠️ Offline — showing locally saved data. Changes will sync when connection restores.');
     }
     setTimeout(()=>initSharePoint(),30000);
@@ -723,9 +898,11 @@ function startRealtimeListener(){
       applyState(state);
       lsSave(state);
       renderDashboard();
-      if(activeTab==='tracker')renderTracker();
-      if(activeTab==='matrix')renderMatrix();
-      if(activeTab==='users')renderUsers();
+      if(activeTab==='hrtracker')  renderHrTracker();
+      if(activeTab==='dirtracker') renderDirTracker();
+      if(activeTab==='hrmatrix')   renderHrMatrix();
+      if(activeTab==='dirmatrix')  renderDirMatrix();
+      if(activeTab==='users')      renderUsers();
       fbSync('live');
       showNotif('🔄 Updated by another team member');
     }catch(err){console.warn('SSE parse error:',err);}
@@ -785,6 +962,8 @@ function loginAs(user){
   renderDashboard();
   renderReports();
   initSharePoint();
+  // also init the dir add button visibility
+  document.getElementById('addDirRowBtn').style.display=can('edit')?'flex':'none';
 }
 function doLogin(){
   const u=document.getElementById('lu').value.trim();
@@ -817,11 +996,13 @@ function can(action){
 //  TABS
 // ════════════════════════════════════════════════
 const TAB_DEF = [
-  {id:'dashboard', label:'📊 Dashboard',            roles:['admin','editor','viewer']},
-  {id:'tracker',   label:'🔗 Integration Tracker',  roles:['admin','editor','viewer']},
-  {id:'matrix',    label:'🧪 Feature Matrix',        roles:['admin','editor','viewer']},
-  {id:'reports',   label:'📄 Reports',               roles:['admin','editor','viewer']},
-  {id:'users',     label:'👥 User Management',       roles:['admin']},
+  {id:'dashboard',  label:'📊 Dashboard',                        roles:['admin','editor','viewer']},
+  {id:'hrtracker',  label:'🔗 HR to ITSM',                       roles:['admin','editor','viewer']},
+  {id:'dirtracker', label:'🏢 ITSM to Directory',                 roles:['admin','editor','viewer']},
+  {id:'hrmatrix',   label:'🧪 HR to ITSM Matrix',                 roles:['admin','editor','viewer']},
+  {id:'dirmatrix',  label:'🗂️ ITSM→Dir Matrix',                  roles:['admin','editor','viewer']},
+  {id:'reports',    label:'📄 Reports',                           roles:['admin','editor','viewer']},
+  {id:'users',      label:'👥 User Management',                   roles:['admin']},
 ];
 function buildTabs(){
   const bar = document.getElementById('tabsBar');
@@ -829,8 +1010,19 @@ function buildTabs(){
   TAB_DEF.filter(t=>t.roles.includes(currentUser.role)).forEach(t=>{
     bar.innerHTML+=`<button class="tbtn" id="tb-${t.id}" onclick="switchTab('${t.id}')">${t.label}</button>`;
   });
-  document.getElementById('addRowBtn').style.display = can('edit') ? 'flex' : 'none';
-  document.getElementById('addMxRowBtn').style.display = can('edit') ? 'flex' : 'none';
+  const e=can('edit');
+  document.getElementById('addRowBtn').style.display    = e?'flex':'none';
+  document.getElementById('addDirRowBtn').style.display = e?'flex':'none';
+  document.getElementById('addHrMxRowBtn').style.display= e?'flex':'none';
+  document.getElementById('addDirMxRowBtn').style.display=e?'flex':'none';
+}
+function refreshCurrentTab(){
+  if(activeTab==='hrtracker')  renderHrTracker();
+  else if(activeTab==='dirtracker') renderDirTracker();
+  else if(activeTab==='hrmatrix')   renderHrMatrix();
+  else if(activeTab==='dirmatrix')  renderDirMatrix();
+  else if(activeTab==='users')      renderUsers();
+  else if(activeTab==='dashboard')  renderDashboard();
 }
 function switchTab(id){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -840,10 +1032,7 @@ function switchTab(id){
   if(p) p.classList.add('active');
   if(b) b.classList.add('active');
   activeTab = id;
-  if(id==='tracker')   renderTracker();
-  if(id==='matrix')    renderMatrix();
-  if(id==='users')     renderUsers();
-  if(id==='dashboard') renderDashboard();
+  refreshCurrentTab();
 }
 
 // ════════════════════════════════════════════════
@@ -852,11 +1041,18 @@ function switchTab(id){
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtDate(d){if(!d)return '';try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch{return d;}}
 function statusCat(s){
+  if(!s) return 'other';
+  if(s==='Live in PROD'||s==='Deployed to PROD') return 'dep';
+  if(s==='QA Approved – Ready for PROD Deployment'||s==='Approval Pending'||s==='Review Pending') return 'ready';
+  if(s==='Test in Progress'||s==='Deployed to Test') return 'pre';
+  if(s==='Dev in Progress'||s==='Backlog') return 'test';
+  if(s==='Blocked'||s==='PROD Regression') return 'blk';
+  // legacy fallbacks
   if(s.includes('Deployed')) return 'dep';
-  if(s.includes('Ready'))    return 'ready';
+  if(s.includes('Ready')) return 'ready';
   if(s.includes('Pre-Prod')||s.includes('Test In Progress')) return 'pre';
-  if(s.includes('Under Testing')) return 'test';
-  if(s.includes('Blocked'))  return 'blk';
+  if(s.includes('Under Testing')||s.includes('Received')) return 'test';
+  if(s.includes('Blocked')) return 'blk';
   return 'other';
 }
 function statusBadge(s){
@@ -867,8 +1063,30 @@ function statusBadge(s){
 }
 function fsBadge(code){
   const n=code==='N/A'?'NA':(code||'NT');
-  const labels={P:'✅ Pass',F:'❌ Fail',IP:'🔄 In Prog',NT:'⬜ NT',IMPL:'🔧 Impl',NI:'⛔ Not Impl',BL:'🚫 Blocked',NA:'➖ N/A'};
+  const labels={P:'✅ Pass',F:'❌ Fail',IP:'🔄 In Prog',NT:'⬜ NT',NI:'⛔ Not Impl',BL:'🚫 Blocked',NA:'➖ N/A'};
   return `<span class="fs fs-${n}">${labels[n]||n}</span>`;
+}
+function triggerEditor(intId, triggers){
+  const colorMap={Hire:'active-hire',Terminate:'active-terminate',Mover:'active-mover',Leave:'active-leave',Rehire:'active-rehire','Pre-Hire':'active-prehire'};
+  const chk=triggers||[];
+  let h='<div class="trig-wrap">';
+  TRIGGER_OPTIONS.forEach(t=>{
+    const cls='trig-lbl'+(chk.includes(t)?' '+colorMap[t]:'');
+    h+=`<label class="${cls}" id="tlbl-${intId}-${t.replace(/[^a-z]/gi,'_')}">
+      <input type="checkbox" value="${t}" ${chk.includes(t)?'checked':''} style="display:none"
+        onchange="updTrigger(${intId},'${t}',this.checked)">
+      ${t}</label>`;
+  });
+  h+=`<button class="trig-all" onclick="selectAllTriggers(${intId})">All</button></div>`;
+  return h;
+}
+function dirFeatureEditor(intId, features){
+  const chk=features||[];
+  return `<div class="dfl-wrap">`+
+    DIR_FEATURE_OPTS.map(f=>`<label class="dfl-lbl">
+      <input type="checkbox" ${chk.includes(f)?'checked':''} style="accent-color:var(--pri2)"
+        onchange="updDirFeature(${intId},'${f}',this.checked)">
+      <span style="font-size:10px">${f}</span></label>`).join('')+`</div>`;
 }
 function fsBg(c){const f=FS_LIST.find(x=>x.code===c);return f?f.bg:'#f3f4f6';}
 function fsCl(c){const f=FS_LIST.find(x=>x.code===c);return f?f.color:'#6b7280';}
@@ -929,101 +1147,115 @@ function renderDashboard(){
     {l:'🚫 Blocked',cnt:c.blk,bg:'#fee2e2',cl:'#dc2626'},
   ];
   document.getElementById('statusSum').innerHTML='<div style="display:flex;gap:10px;flex-wrap:wrap">'+
-    sum.map(s=>`<div style="flex:1;min-width:150px;background:${s.bg};border-radius:10px;padding:14px 16px;border-left:4px solid ${s.cl}"><div style="font-size:22px;font-weight:900;color:${s.cl}">${s.cnt}</div><div style="font-size:11px;font-weight:700;color:${s.cl};margin-top:2px">${s.l}</div><div style="font-size:11px;color:${s.cl};opacity:.7">${Math.round(s.cnt/c.total*100)}% of total</div></div>`).join('')+'</div>';
+    sum.map(s=>`<div style="flex:1;min-width:150px;background:${s.bg};border-radius:10px;padding:14px 16px;border-left:4px solid ${s.cl}"><div style="font-size:22px;font-weight:900;color:${s.cl}">${s.cnt}</div><div style="font-size:11px;font-weight:700;color:${s.cl};margin-top:2px">${s.l}</div><div style="font-size:11px;color:${s.cl};opacity:.7">${c.total?Math.round(s.cnt/c.total*100):0}% of total</div></div>`).join('')+'</div>';
 }
 
 // ════════════════════════════════════════════════
-//  TRACKER — SORT & FILTER
+//  HR TRACKER — SORT & FILTER
 // ════════════════════════════════════════════════
-function qf(v,btn){
-  qFilter=v;
-  document.querySelectorAll('#quickFilters .fbtn').forEach(b=>b.classList.remove('active'));
+function hrQf(v,btn){
+  hrQFilter=v;
+  document.querySelectorAll('#hrQuickFilters .fbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderTracker();
+  renderHrTracker();
 }
-function search(v){srchQ=v;renderTracker();}
-function toggleFilters(){
-  showFilters=!showFilters;
-  document.getElementById('fltToggle').classList.toggle('active',showFilters);
-  renderTracker();
+function hrSearch(v){hrSrchQ=v;renderHrTracker();}
+function toggleHrFilters(){
+  hrShowFilters=!hrShowFilters;
+  document.getElementById('hrFltToggle').classList.toggle('active',hrShowFilters);
+  renderHrTracker();
 }
-function setSort(col){
-  if(sortState.col===col) sortState.dir=sortState.dir==='asc'?'desc':'asc';
-  else {sortState.col=col;sortState.dir='asc';}
-  renderTracker();
+function setHrSort(col){
+  if(hrSortState.col===col) hrSortState.dir=hrSortState.dir==='asc'?'desc':'asc';
+  else {hrSortState.col=col;hrSortState.dir='asc';}
+  renderHrTracker();
 }
-function setColFilter(id,val){colFilters[id]=val;renderTracker();}
-
-function getFilteredSorted(){
+function setHrColFilter(id,val){hrColFilters[id]=val;renderHrTracker();}
+function getHrFiltered(){
   let rows=[...integrations];
-  // quick filter
-  if(qFilter!=='all') rows=rows.filter(i=>i.status.toLowerCase().includes(qFilter.toLowerCase()));
-  // search
-  if(srchQ){const q=srchQ.toLowerCase();rows=rows.filter(i=>['customer','integration','hrSource','itsm','tester','jira','notes'].some(f=>(i[f]||'').toLowerCase().includes(q)));}
-  // col filters
-  Object.entries(colFilters).forEach(([f,v])=>{
-    if(!v) return;
-    rows=rows.filter(i=>(String(i[f]||'').toLowerCase().includes(v.toLowerCase())));
-  });
-  // sort
-  if(sortState.col){
-    const col=sortState.col, dir=sortState.dir==='asc'?1:-1;
-    rows.sort((a,b)=>{
-      let av=a[col]||'', bv=b[col]||'';
-      if(typeof av==='number') return (av-bv)*dir;
-      return String(av).localeCompare(String(bv))*dir;
-    });
+  if(hrQFilter!=='all') rows=rows.filter(i=>statusCat(i.status)===hrQFilter);
+  if(hrSrchQ){const q=hrSrchQ.toLowerCase();rows=rows.filter(i=>['customer','integration','hrSource','itsm','tester','jira','notes'].some(f=>(i[f]||'').toLowerCase().includes(q)));}
+  Object.entries(hrColFilters).forEach(([f,v])=>{if(!v)return;rows=rows.filter(i=>String(i[f]||'').toLowerCase().includes(v.toLowerCase()));});
+  if(hrSortState.col){
+    const col=hrSortState.col, dir=hrSortState.dir==='asc'?1:-1;
+    rows.sort((a,b)=>{let av=a[col]||'',bv=b[col]||'';if(typeof av==='number')return(av-bv)*dir;return String(av).localeCompare(String(bv))*dir;});
   }
   return rows;
 }
 
 // ════════════════════════════════════════════════
-//  TRACKER — RENDER
+//  DIR TRACKER — SORT & FILTER
 // ════════════════════════════════════════════════
-function renderTracker(){
+function dirQf(v,btn){
+  dirQFilter=v;
+  document.querySelectorAll('#dirQuickFilters .fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDirTracker();
+}
+function dirSearch(v){dirSrchQ=v;renderDirTracker();}
+function toggleDirFilters(){
+  dirShowFilters=!dirShowFilters;
+  document.getElementById('dirFltToggle').classList.toggle('active',dirShowFilters);
+  renderDirTracker();
+}
+function setDirSort(col){
+  if(dirSortState.col===col) dirSortState.dir=dirSortState.dir==='asc'?'desc':'asc';
+  else {dirSortState.col=col;dirSortState.dir='asc';}
+  renderDirTracker();
+}
+function setDirColFilter(id,val){dirColFilters[id]=val;renderDirTracker();}
+function getDirFiltered(){
+  let rows=[...dirIntegrations];
+  if(dirQFilter!=='all') rows=rows.filter(i=>statusCat(i.status)===dirQFilter);
+  if(dirSrchQ){const q=dirSrchQ.toLowerCase();rows=rows.filter(i=>['customer','integration','itsmSource','dirTarget','tester','jira','notes'].some(f=>(i[f]||'').toLowerCase().includes(q)));}
+  Object.entries(dirColFilters).forEach(([f,v])=>{if(!v)return;rows=rows.filter(i=>String(i[f]||'').toLowerCase().includes(v.toLowerCase()));});
+  if(dirSortState.col){
+    const col=dirSortState.col, dir=dirSortState.dir==='asc'?1:-1;
+    rows.sort((a,b)=>{let av=a[col]||'',bv=b[col]||'';if(typeof av==='number')return(av-bv)*dir;return String(av).localeCompare(String(bv))*dir;});
+  }
+  return rows;
+}
+
+// ════════════════════════════════════════════════
+//  HR TRACKER — RENDER
+// ════════════════════════════════════════════════
+function renderHrTracker(){
   const visCols = colConfig.filter(c=>c.visible);
-  const rows = getFilteredSorted();
-  document.getElementById('trCnt').textContent=`(${rows.length} of ${integrations.length})`;
+  const rows = getHrFiltered();
+  document.getElementById('hrTrCnt').textContent=`(${rows.length} of ${integrations.length})`;
 
   // Header
   let headHtml='<tr>';
   visCols.forEach(c=>{
     const sortable=['customer','integration','hrSource','itsm','status','tester','received','signoff'].includes(c.id);
-    const isActive=sortState.col===c.id;
-    const ind = isActive?(sortState.dir==='asc'?'▲':'▼'):'⇅';
-    if(sortable){
-      headHtml+=`<th class="sortable" onclick="setSort('${c.id}')">${c.label} <span class="sort-ind${isActive?' '+sortState.dir:''}">${ind}</span></th>`;
-    } else {
-      headHtml+=`<th>${c.label}</th>`;
-    }
+    const isActive=hrSortState.col===c.id;
+    const ind=isActive?(hrSortState.dir==='asc'?'▲':'▼'):'⇅';
+    headHtml+=sortable
+      ?`<th class="sortable" onclick="setHrSort('${c.id}')">${c.label} <span class="sort-ind${isActive?' '+hrSortState.dir:''}">${ind}</span></th>`
+      :`<th>${c.label}</th>`;
   });
+  if(can('edit')) headHtml+='<th style="width:36px"></th>';
   headHtml+='</tr>';
 
   // Filter row
-  if(showFilters){
+  if(hrShowFilters){
     headHtml+='<tr class="frow">';
     visCols.forEach(c=>{
-      const filterable=['customer','integration','hrSource','itsm','tester','jira','notes'].includes(c.id);
-      if(c.id==='status'){
-        const opts=['','Received for Testing','Under Testing','Test In Progress (Pre-Prod)','Ready for PROD Deployment','Deployed to PROD','Under Dev – Blocked']
-          .map(s=>`<option value="${s}" ${(colFilters[c.id]||'')==s?'selected':''}>${s||'All'}</option>`).join('');
-        headHtml+=`<th><select onchange="setColFilter('status',this.value)">${opts}</select></th>`;
-      } else if(filterable){
-        headHtml+=`<th><input type="text" placeholder="Filter…" value="${esc(colFilters[c.id]||'')}" oninput="setColFilter('${c.id}',this.value)"></th>`;
-      } else {
-        headHtml+='<th></th>';
-      }
+      const filterable=['customer','integration','hrSource','itsm','status','tester','jira','notes'].includes(c.id);
+      headHtml+=filterable
+        ?`<th><input type="text" placeholder="Filter…" value="${esc(hrColFilters[c.id]||'')}" oninput="setHrColFilter('${c.id}',this.value)"></th>`
+        :'<th></th>';
     });
+    if(can('edit')) headHtml+='<th></th>';
     headHtml+='</tr>';
   }
-
-  document.getElementById('trHead').innerHTML=headHtml;
+  document.getElementById('hrTrHead').innerHTML=headHtml;
 
   // Body
-  const canEdit = can('edit');
+  const canEdit=can('edit');
   let bodyHtml='';
   if(!rows.length){
-    bodyHtml=`<tr><td colspan="${visCols.length}" style="text-align:center;padding:30px;color:var(--muted)">No integrations match the current filter.</td></tr>`;
+    bodyHtml=`<tr><td colspan="${visCols.length+(canEdit?1:0)}" style="text-align:center;padding:30px;color:var(--muted)">No integrations match the current filter.</td></tr>`;
   }
   rows.forEach(int=>{
     bodyHtml+='<tr>';
@@ -1032,85 +1264,188 @@ function renderTracker(){
       switch(c.id){
         case 'sno': bodyHtml+=`<span style="font-weight:700;color:var(--muted)">${int.id}</span>`; break;
         case 'customer':
-          bodyHtml += canEdit
-            ? `<input class="ei" value="${esc(int.customer)}" onchange="updInt(${int.id},'customer',this.value)" style="min-width:120px">`
-            : `<span style="font-weight:600">${esc(int.customer)}</span>`;
-          break;
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.customer)}" onchange="updInt(${int.id},'customer',this.value)" style="min-width:120px">`:`<span style="font-weight:600">${esc(int.customer)}</span>`; break;
         case 'integration':
-          bodyHtml += canEdit
-            ? `<input class="ei" value="${esc(int.integration)}" onchange="updInt(${int.id},'integration',this.value)" style="min-width:150px">`
-            : esc(int.integration);
-          break;
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.integration)}" onchange="updInt(${int.id},'integration',this.value)" style="min-width:150px">`:esc(int.integration); break;
         case 'hrSource':
-          bodyHtml += canEdit
-            ? `<input class="ei" value="${esc(int.hrSource)}" onchange="updInt(${int.id},'hrSource',this.value)" style="min-width:90px">`
-            : esc(int.hrSource);
-          break;
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.hrSource)}" onchange="updInt(${int.id},'hrSource',this.value)" style="min-width:90px">`:esc(int.hrSource); break;
         case 'itsm':
-          bodyHtml += canEdit
-            ? `<input class="ei" value="${esc(int.itsm)}" onchange="updInt(${int.id},'itsm',this.value)" style="min-width:90px">`
-            : esc(int.itsm);
-          break;
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.itsm)}" onchange="updInt(${int.id},'itsm',this.value)" style="min-width:90px">`:esc(int.itsm); break;
         case 'status':
-          bodyHtml += canEdit
-            ? `<select class="esel" onchange="updInt(${int.id},'status',this.value)" style="min-width:160px">${INT_STATUSES.map(s=>`<option value="${s}"${s===int.status?' selected':''}>${s}</option>`).join('')}</select>`
-            : statusBadge(int.status);
-          break;
+          bodyHtml+=canEdit
+            ?`<select class="esel" onchange="updInt(${int.id},'status',this.value)" style="min-width:180px">${INT_STATUSES.map(s=>`<option value="${s}"${s===int.status?' selected':''}>${s}</option>`).join('')}</select>`
+            :statusBadge(int.status); break;
         case 'tester':
-          bodyHtml += canEdit
-            ? `<input class="ei" value="${esc(int.tester)}" placeholder="Assign…" onchange="updInt(${int.id},'tester',this.value)" style="min-width:100px">`
-            : (int.tester?`<span style="font-weight:600;color:var(--pri)">${esc(int.tester)}</span>`:'<span style="color:#cbd5e1;font-style:italic">Unassigned</span>');
-          break;
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.tester)}" placeholder="Assign…" onchange="updInt(${int.id},'tester',this.value)" style="min-width:100px">`:
+            (int.tester?`<span style="font-weight:600;color:var(--pri)">${esc(int.tester)}</span>`:'<span style="color:#cbd5e1;font-style:italic">Unassigned</span>'); break;
         case 'received':
-          bodyHtml += canEdit
-            ? `<input class="ei" type="date" value="${int.received}" onchange="updInt(${int.id},'received',this.value)">`
-            : (int.received?fmtDate(int.received):'<span style="color:#cbd5e1">—</span>');
-          break;
+          bodyHtml+=canEdit?`<input class="ei" type="date" value="${int.received||''}" onchange="updInt(${int.id},'received',this.value)">`:
+            (int.received?fmtDate(int.received):'<span style="color:#cbd5e1">—</span>'); break;
         case 'signoff':
-          bodyHtml += canEdit
-            ? `<input class="ei" type="date" value="${int.signoff}" onchange="updInt(${int.id},'signoff',this.value)">`
-            : (int.signoff?fmtDate(int.signoff):'<span style="color:#cbd5e1">—</span>');
-          break;
+          bodyHtml+=canEdit?`<input class="ei" type="date" value="${int.signoff||''}" onchange="updInt(${int.id},'signoff',this.value)">`:
+            (int.signoff?fmtDate(int.signoff):'<span style="color:#cbd5e1">—</span>'); break;
         case 'jira':
-          bodyHtml += canEdit
-            ? `<input class="ei" value="${esc(int.jira)}" placeholder="INT-XXXX" onchange="updInt(${int.id},'jira',this.value)" style="min-width:90px">`
-            : jiraLink(int.jira);
+          if(canEdit){
+            bodyHtml+=`<div style="display:flex;align-items:center;gap:4px"><input class="ei" value="${esc(int.jira||'')}" placeholder="INT-XXXX" onchange="updInt(${int.id},'jira',this.value)" style="min-width:80px;max-width:100px">${int.jira?`<a href="${esc(cfg.jiraBase+(int.jira||''))}" target="_blank" style="color:var(--pri2);font-size:14px;text-decoration:none" title="Open in JIRA">↗</a>`:''}</div>`;
+          } else { bodyHtml+=jiraLink(int.jira); }
           break;
-        case 'triggers': bodyHtml += triggerChips(int.triggers)||'<span style="color:#cbd5e1">—</span>'; break;
+        case 'triggers':
+          bodyHtml+=canEdit?triggerEditor(int.id,int.triggers):triggerChips(int.triggers)||'<span style="color:#cbd5e1">—</span>'; break;
         case 'features':
-          bodyHtml += `<span style="font-size:11px;color:var(--muted);max-width:180px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(int.features)}">${int.features?int.features.substring(0,70)+(int.features.length>70?'…':''):'<span style="color:#cbd5e1">—</span>'}</span>`;
+          bodyHtml+=canEdit
+            ?`<input class="ei" value="${esc(int.features||'')}" placeholder="Features…" onchange="updInt(${int.id},'features',this.value)" style="min-width:120px">`
+            :(int.features?`<span style="font-size:11px;color:var(--muted)" title="${esc(int.features)}">${esc(int.features).substring(0,60)}${int.features.length>60?'…':''}</span>`:'<span style="color:#cbd5e1">—</span>');
           break;
         case 'notes':
-          bodyHtml += canEdit
-            ? `<input class="ei" value="${esc(int.notes)}" placeholder="Blockers…" onchange="updInt(${int.id},'notes',this.value)" style="min-width:120px">`
-            : (int.notes?`<span style="color:var(--muted);font-style:italic;font-size:11px">${esc(int.notes)}</span>`:'<span style="color:#cbd5e1">—</span>');
-          break;
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.notes||'')}" placeholder="Blockers…" onchange="updInt(${int.id},'notes',this.value)" style="min-width:120px">`:
+            (int.notes?`<span style="color:var(--muted);font-style:italic;font-size:11px">${esc(int.notes)}</span>`:'<span style="color:#cbd5e1">—</span>'); break;
         default: bodyHtml+='—';
       }
       bodyHtml+='</td>';
     });
+    if(canEdit) bodyHtml+=`<td><button class="ab-delrow" onclick="openDeleteItem('hrInt',${int.id},'${esc(int.customer)} — ${esc(int.integration)}')">🗑</button></td>`;
     bodyHtml+='</tr>';
   });
-  document.getElementById('trBody').innerHTML=bodyHtml;
+  document.getElementById('hrTrBody').innerHTML=bodyHtml;
 }
 
 function updInt(id,field,value){
   const i=integrations.find(x=>x.id===id);
-  if(i){i[field]=value; if(field==='status'||field==='itsm'||field==='hrSource'){renderTracker();renderDashboard();}
-  withLocalWrite(()=>spPush());showNotif('✅ Saved');}
+  if(i){i[field]=value;if(field==='status'||field==='itsm'||field==='hrSource'){renderHrTracker();renderDashboard();}withLocalWrite(()=>spPush());showNotif('✅ Saved');}
 }
-function addNewIntegration(){
-  const newInt={id:nextIntId++,customer:'New Customer',integration:'HR Source to ITSM',hrSource:'',itsm:'',status:'Received for Testing',tester:'',received:'',signoff:'',jira:'',triggers:[],features:'',notes:''};
-  integrations.unshift(newInt);
-  withLocalWrite(()=>spPush());
-  renderTracker();
-  showNotif('➕ New integration added — edit the row above');
+function updTrigger(id,trigger,checked){
+  const i=integrations.find(x=>x.id===id);
+  if(!i) return;
+  if(!Array.isArray(i.triggers)) i.triggers=[];
+  if(checked&&!i.triggers.includes(trigger)) i.triggers.push(trigger);
+  else if(!checked) i.triggers=i.triggers.filter(t=>t!==trigger);
+  withLocalWrite(()=>spPush());showNotif('✅ Saved');
+}
+function selectAllTriggers(id){
+  const i=integrations.find(x=>x.id===id);
+  if(!i) return;
+  i.triggers=[...TRIGGER_OPTIONS];
+  withLocalWrite(()=>spPush());renderHrTracker();
+}
+function addNewHrIntegration(){
+  integrations.unshift({id:nextIntId++,customer:'New Customer',integration:'HR Source to ITSM',hrSource:'',itsm:'',status:'Backlog',tester:'',received:'',signoff:'',jira:'',triggers:[],features:'',notes:''});
+  withLocalWrite(()=>spPush());renderHrTracker();showNotif('➕ New integration added');
+}
+
+// ════════════════════════════════════════════════
+//  DIR TRACKER — RENDER
+// ════════════════════════════════════════════════
+function renderDirTracker(){
+  const visCols=dirColConfig.filter(c=>c.visible);
+  const rows=getDirFiltered();
+  document.getElementById('dirTrCnt').textContent=`(${rows.length} of ${dirIntegrations.length})`;
+
+  // Header
+  let headHtml='<tr>';
+  visCols.forEach(c=>{
+    const sortable=['customer','integration','itsmSource','dirTarget','status','tester','received','signoff'].includes(c.id);
+    const isActive=dirSortState.col===c.id;
+    const ind=isActive?(dirSortState.dir==='asc'?'▲':'▼'):'⇅';
+    headHtml+=sortable
+      ?`<th class="sortable" onclick="setDirSort('${c.id}')">${c.label} <span class="sort-ind${isActive?' '+dirSortState.dir:''}">${ind}</span></th>`
+      :`<th>${c.label}</th>`;
+  });
+  if(can('edit')) headHtml+='<th style="width:36px"></th>';
+  headHtml+='</tr>';
+
+  // Filter row
+  if(dirShowFilters){
+    headHtml+='<tr class="frow">';
+    visCols.forEach(c=>{
+      const filterable=['customer','integration','itsmSource','dirTarget','status','tester','jira','notes'].includes(c.id);
+      headHtml+=filterable
+        ?`<th><input type="text" placeholder="Filter…" value="${esc(dirColFilters[c.id]||'')}" oninput="setDirColFilter('${c.id}',this.value)"></th>`
+        :'<th></th>';
+    });
+    if(can('edit')) headHtml+='<th></th>';
+    headHtml+='</tr>';
+  }
+  document.getElementById('dirTrHead').innerHTML=headHtml;
+
+  // Body
+  const canEdit=can('edit');
+  let bodyHtml='';
+  if(!rows.length){
+    const msg=dirIntegrations.length===0?'No ITSM to Directory integrations yet. Click ➕ Add Integration to get started.':'No integrations match the current filter.';
+    bodyHtml=`<tr><td colspan="${visCols.length+(canEdit?1:0)}" style="text-align:center;padding:30px;color:var(--muted)">${msg}</td></tr>`;
+  }
+  rows.forEach(int=>{
+    bodyHtml+='<tr>';
+    visCols.forEach(c=>{
+      bodyHtml+='<td>';
+      switch(c.id){
+        case 'sno': bodyHtml+=`<span style="font-weight:700;color:var(--muted)">${int.id}</span>`; break;
+        case 'customer':
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.customer||'')}" onchange="updDirInt(${int.id},'customer',this.value)" style="min-width:120px">`:`<span style="font-weight:600">${esc(int.customer)}</span>`; break;
+        case 'integration':
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.integration||'')}" onchange="updDirInt(${int.id},'integration',this.value)" style="min-width:150px">`:esc(int.integration); break;
+        case 'itsmSource':
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.itsmSource||'')}" onchange="updDirInt(${int.id},'itsmSource',this.value)" style="min-width:90px">`:esc(int.itsmSource); break;
+        case 'dirTarget':
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.dirTarget||'')}" onchange="updDirInt(${int.id},'dirTarget',this.value)" style="min-width:90px">`:esc(int.dirTarget); break;
+        case 'status':
+          bodyHtml+=canEdit
+            ?`<select class="esel" onchange="updDirInt(${int.id},'status',this.value)" style="min-width:180px">${INT_STATUSES.map(s=>`<option value="${s}"${s===int.status?' selected':''}>${s}</option>`).join('')}</select>`
+            :statusBadge(int.status); break;
+        case 'tester':
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.tester||'')}" placeholder="Assign…" onchange="updDirInt(${int.id},'tester',this.value)" style="min-width:100px">`:
+            (int.tester?`<span style="font-weight:600;color:var(--pri)">${esc(int.tester)}</span>`:'<span style="color:#cbd5e1;font-style:italic">Unassigned</span>'); break;
+        case 'received':
+          bodyHtml+=canEdit?`<input class="ei" type="date" value="${int.received||''}" onchange="updDirInt(${int.id},'received',this.value)">`:
+            (int.received?fmtDate(int.received):'<span style="color:#cbd5e1">—</span>'); break;
+        case 'signoff':
+          bodyHtml+=canEdit?`<input class="ei" type="date" value="${int.signoff||''}" onchange="updDirInt(${int.id},'signoff',this.value)">`:
+            (int.signoff?fmtDate(int.signoff):'<span style="color:#cbd5e1">—</span>'); break;
+        case 'jira':
+          if(canEdit){
+            bodyHtml+=`<div style="display:flex;align-items:center;gap:4px"><input class="ei" value="${esc(int.jira||'')}" placeholder="INT-XXXX" onchange="updDirInt(${int.id},'jira',this.value)" style="min-width:80px;max-width:100px">${int.jira?`<a href="${esc(cfg.jiraBase+(int.jira||''))}" target="_blank" style="color:var(--pri2);font-size:14px;text-decoration:none" title="Open in JIRA">↗</a>`:''}</div>`;
+          } else { bodyHtml+=jiraLink(int.jira); }
+          break;
+        case 'features':
+          bodyHtml+=canEdit?dirFeatureEditor(int.id,int.features):
+            ((int.features&&int.features.length)?int.features.map(f=>`<span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block;margin:1px">${f}</span>`).join(' '):'<span style="color:#cbd5e1">—</span>');
+          break;
+        case 'notes':
+          bodyHtml+=canEdit?`<input class="ei" value="${esc(int.notes||'')}" placeholder="Blockers…" onchange="updDirInt(${int.id},'notes',this.value)" style="min-width:120px">`:
+            (int.notes?`<span style="color:var(--muted);font-style:italic;font-size:11px">${esc(int.notes)}</span>`:'<span style="color:#cbd5e1">—</span>'); break;
+        default: bodyHtml+='—';
+      }
+      bodyHtml+='</td>';
+    });
+    if(canEdit) bodyHtml+=`<td><button class="ab-delrow" onclick="openDeleteItem('dirInt',${int.id},'${esc(int.customer)} — ${esc(int.integration)}')">🗑</button></td>`;
+    bodyHtml+='</tr>';
+  });
+  document.getElementById('dirTrBody').innerHTML=bodyHtml;
+}
+
+function updDirInt(id,field,value){
+  const i=dirIntegrations.find(x=>x.id===id);
+  if(i){i[field]=value;if(field==='status'){renderDirTracker();}withLocalWrite(()=>spPush());showNotif('✅ Saved');}
+}
+function updDirFeature(id,feature,checked){
+  const i=dirIntegrations.find(x=>x.id===id);
+  if(!i) return;
+  if(!Array.isArray(i.features)) i.features=[];
+  if(checked&&!i.features.includes(feature)) i.features.push(feature);
+  else if(!checked) i.features=i.features.filter(f=>f!==feature);
+  withLocalWrite(()=>spPush());showNotif('✅ Saved');
+}
+function addNewDirIntegration(){
+  dirIntegrations.unshift({id:nextDirIntId++,customer:'New Customer',integration:'ITSM to Directory',itsmSource:'',dirTarget:'Active Directory',status:'Backlog',tester:'',received:'',signoff:'',jira:'',features:[],notes:''});
+  withLocalWrite(()=>spPush());renderDirTracker();showNotif('➕ New integration added');
 }
 
 // ════════════════════════════════════════════════
 //  COLUMN MANAGER
 // ════════════════════════════════════════════════
-function openColPanel(){
+function openColPanel(type){
+  activeColPanelType=type||'hr';
+  document.getElementById('colPanel').querySelector('h3').textContent=type==='dir'?'⚙️ ITSM→Dir Columns':'⚙️ HR→ITSM Columns';
   renderColList();
   document.getElementById('colPanel').classList.add('open');
   document.getElementById('colOverlay').style.display='block';
@@ -1119,87 +1454,123 @@ function closeColPanel(){
   document.getElementById('colPanel').classList.remove('open');
   document.getElementById('colOverlay').style.display='none';
 }
+function getActiveColCfg(){return activeColPanelType==='dir'?dirColConfig:colConfig;}
 function renderColList(){
-  document.getElementById('colList').innerHTML=colConfig.map((c,i)=>`
+  const cfg=getActiveColCfg();
+  document.getElementById('colList').innerHTML=cfg.map((c,i)=>`
     <div class="col-item">
-      <input type="checkbox" id="cc${i}" ${c.visible?'checked':''} ${c.locked?'disabled':''} onchange="colConfig[${i}].visible=this.checked">
+      <input type="checkbox" id="cc${i}" ${c.visible?'checked':''} ${c.locked?'disabled':''} onchange="getActiveColCfg()[${i}].visible=this.checked">
       <label for="cc${i}">${c.label}${c.locked?' 🔒':''}</label>
       <div class="col-order-btns">
         <button class="cob" onclick="moveCol(${i},-1)" ${i===0?'disabled':''}>▲</button>
-        <button class="cob" onclick="moveCol(${i},1)" ${i===colConfig.length-1?'disabled':''}>▼</button>
+        <button class="cob" onclick="moveCol(${i},1)" ${i===cfg.length-1?'disabled':''}>▼</button>
       </div>
     </div>`).join('');
 }
 function moveCol(i,dir){
+  const cfg=getActiveColCfg();
   const j=i+dir;
-  if(j<0||j>=colConfig.length) return;
-  [colConfig[i],colConfig[j]]=[colConfig[j],colConfig[i]];
+  if(j<0||j>=cfg.length) return;
+  [cfg[i],cfg[j]]=[cfg[j],cfg[i]];
   renderColList();
 }
-function applyColConfig(){closeColPanel();renderTracker();}
+function applyColConfig(){closeColPanel();activeColPanelType==='dir'?renderDirTracker():renderHrTracker();}
 function resetCols(){
-  colConfig.forEach(c=>c.visible=true);
+  getActiveColCfg().forEach(c=>c.visible=true);
   renderColList();
-  renderTracker();
+  activeColPanelType==='dir'?renderDirTracker():renderHrTracker();
 }
 
 // ════════════════════════════════════════════════
-//  FEATURE MATRIX
+//  HR FEATURE MATRIX — RENDER
 // ════════════════════════════════════════════════
-function renderMatrix(){
-  const canEdit=can('edit');
-  document.getElementById('mxLegend').innerHTML='<strong style="font-size:10px;color:var(--muted);margin-right:4px">LEGEND:</strong>'+
+function buildMxLegend(legendId){
+  document.getElementById(legendId).innerHTML='<strong style="font-size:10px;color:var(--muted);margin-right:4px">LEGEND:</strong>'+
     FS_LIST.map(s=>`<div class="li"><span class="fs fs-${s.code}">${s.emoji} ${s.label}</span></div>`).join('');
-
-  const t=document.getElementById('mxTable');
+}
+function renderMxTable(tableId, matrix, featCols, updFn, deleteFn){
+  const canEdit=can('edit');
+  const t=document.getElementById(tableId);
+  const hasDelCol=canEdit;
   let h='<thead><tr>';
   h+=`<th class="stk1" rowspan="2" style="z-index:3;border:1px solid var(--border)">ITSM</th>`;
-  h+=`<th class="stk2" rowspan="2" style="z-index:3;border:1px solid var(--border)">HR Source</th>`;
-  FEAT_COLS.forEach(g=>h+=`<th colspan="${g.cols.length}" class="gh" style="border:1px solid rgba(255,255,255,.25)">${g.group}</th>`);
-  h+=`<th rowspan="2" class="gh" style="min-width:120px;border:1px solid rgba(255,255,255,.25)">Ticket Types</th>`;
+  h+=`<th class="stk2" rowspan="2" style="z-index:3;border:1px solid var(--border)">Source</th>`;
+  featCols.forEach(g=>h+=`<th colspan="${g.cols.length}" class="gh" style="border:1px solid rgba(255,255,255,.25)">${g.group}</th>`);
+  h+=`<th rowspan="2" class="gh" style="min-width:100px;border:1px solid rgba(255,255,255,.25)">Ticket Types</th>`;
+  if(hasDelCol) h+=`<th rowspan="2" class="gh" style="width:36px;border:1px solid rgba(255,255,255,.25)"></th>`;
   h+='</tr><tr>';
-  FEAT_COLS.forEach(g=>g.cols.forEach(c=>h+=`<th style="min-width:55px;font-size:9px">${c}</th>`));
+  featCols.forEach(g=>g.cols.forEach(c=>h+=`<th style="min-width:52px;font-size:9px">${c}</th>`));
   h+='</tr></thead><tbody>';
-
-  featureMatrix.forEach(row=>{
-    h+=`<tr><td class="stk1" style="background:#fff">${esc(row.itsm)}</td><td class="stk2" style="background:#fff">${esc(row.hrSource)}</td>`;
+  if(!matrix.length){
+    const cols=2+featCols.reduce((s,g)=>s+g.cols.length,0)+1+(hasDelCol?1:0);
+    h+=`<tr><td colspan="${cols}" style="text-align:center;padding:24px;color:var(--muted)">No rows yet. Click ➕ Add Row to get started.</td></tr>`;
+  }
+  matrix.forEach(row=>{
+    const src=row.hrSource||row.dirTarget||'—';
+    h+=`<tr><td class="stk1" style="background:#fff">${esc(row.itsm)}</td><td class="stk2" style="background:#fff">${esc(src)}</td>`;
     row.data.forEach((val,ci)=>{
       const code=val==='N/A'?'NA':(val||'NT');
       if(canEdit){
         const opts=FS_LIST.map(s=>`<option value="${s.code}"${s.code===code?' selected':''}>${s.emoji} ${s.label}</option>`).join('');
-        h+=`<td><select class="fs-sel" onchange="updMx(${row.id},${ci},this.value)" style="background:${fsBg(code)};color:${fsCl(code)};border-color:${fsCl(code)}">${opts}</select></td>`;
+        h+=`<td><select class="fs-sel" onchange="${updFn}(${row.id},${ci},this.value)" style="background:${fsBg(code)};color:${fsCl(code)};border-color:${fsCl(code)}">${opts}</select></td>`;
       } else {
         h+=`<td>${fsBadge(code)}</td>`;
       }
     });
-    h+=`<td style="font-size:10px;font-weight:600;color:var(--pri2);text-align:left;padding:4px 8px">${esc(row.ticketTypes)||'—'}</td></tr>`;
+    h+=`<td style="font-size:10px;font-weight:600;color:var(--pri2);text-align:left;padding:4px 8px">${esc(row.ticketTypes)||'—'}</td>`;
+    if(hasDelCol) h+=`<td><button class="ab-delrow" onclick="${deleteFn}(${row.id})">🗑</button></td>`;
+    h+='</tr>';
   });
   t.innerHTML=h+'</tbody>';
 }
-function updMx(id,ci,val){
-  const r=featureMatrix.find(x=>x.id===id);
-  if(r){r.data[ci]=val;withLocalWrite(()=>spPush());showNotif('✅ Updated');}
+function renderHrMatrix(){
+  buildMxLegend('hrMxLegend');
+  renderMxTable('hrMxTable',featureMatrix,HR_FEAT_COLS,'updHrMx','delHrMxRow');
 }
-function openAddMatrixRow(){
-  document.getElementById('mxItsm').value='';
-  document.getElementById('mxHrSource').value='';
-  document.getElementById('mxTicketTypes').value='';
-  document.getElementById('mxErr').textContent='';
-  document.getElementById('mxModal').classList.add('show');
+function renderDirMatrix(){
+  buildMxLegend('dirMxLegend');
+  renderMxTable('dirMxTable',dirFeatureMatrix,DIR_FEAT_COLS,'updDirMx','delDirMxRow');
 }
-function saveMatrixRow(){
-  const itsm=document.getElementById('mxItsm').value.trim();
-  const hr=document.getElementById('mxHrSource').value.trim();
-  const tt=document.getElementById('mxTicketTypes').value.trim();
-  const err=document.getElementById('mxErr');
+function updHrMx(id,ci,val){const r=featureMatrix.find(x=>x.id===id);if(r){r.data[ci]=val;withLocalWrite(()=>spPush());showNotif('✅ Updated');}}
+function updDirMx(id,ci,val){const r=dirFeatureMatrix.find(x=>x.id===id);if(r){r.data[ci]=val;withLocalWrite(()=>spPush());showNotif('✅ Updated');}}
+function delHrMxRow(id){openDeleteItem('hrMx',id,'HR matrix row #'+id);}
+function delDirMxRow(id){openDeleteItem('dirMx',id,'Dir matrix row #'+id);}
+
+function openAddHrMatrixRow(){
+  document.getElementById('hrMxItsm').value='';
+  document.getElementById('hrMxHrSource').value='';
+  document.getElementById('hrMxTicketTypes').value='';
+  document.getElementById('hrMxErr').textContent='';
+  document.getElementById('hrMxModal').classList.add('show');
+}
+function saveHrMatrixRow(){
+  const itsm=document.getElementById('hrMxItsm').value.trim();
+  const hr=document.getElementById('hrMxHrSource').value.trim();
+  const tt=document.getElementById('hrMxTicketTypes').value.trim();
+  const err=document.getElementById('hrMxErr');
   if(!itsm){err.textContent='Please select an ITSM app.';return;}
   if(!hr){err.textContent='HR Source is required.';return;}
-  const totalCols=FEAT_COLS.reduce((sum,g)=>sum+g.cols.length,0);
+  const totalCols=HR_FEAT_COLS.reduce((sum,g)=>sum+g.cols.length,0);
   featureMatrix.push({id:nextMxId++,itsm,hrSource:hr,ticketTypes:tt,data:Array(totalCols).fill('NT')});
-  withLocalWrite(()=>spPush());
-  closeOverlay('mxModal');
-  renderMatrix();
-  showNotif('➕ Row added to Feature Matrix');
+  withLocalWrite(()=>spPush());closeOverlay('hrMxModal');renderHrMatrix();showNotif('➕ Row added to HR Matrix');
+}
+function openAddDirMatrixRow(){
+  document.getElementById('dirMxItsm').value='';
+  document.getElementById('dirMxDirTarget').value='';
+  document.getElementById('dirMxTicketTypes').value='';
+  document.getElementById('dirMxErr').textContent='';
+  document.getElementById('dirMxModal').classList.add('show');
+}
+function saveDirMatrixRow(){
+  const itsm=document.getElementById('dirMxItsm').value.trim();
+  const dt=document.getElementById('dirMxDirTarget').value.trim();
+  const tt=document.getElementById('dirMxTicketTypes').value.trim();
+  const err=document.getElementById('dirMxErr');
+  if(!itsm){err.textContent='Please select an ITSM source.';return;}
+  if(!dt){err.textContent='Directory target is required.';return;}
+  const totalCols=DIR_FEAT_COLS.reduce((sum,g)=>sum+g.cols.length,0);
+  dirFeatureMatrix.push({id:nextDirMxId++,itsm,dirTarget:dt,ticketTypes:tt,data:Array(totalCols).fill('NT')});
+  withLocalWrite(()=>spPush());closeOverlay('dirMxModal');renderDirMatrix();showNotif('➕ Row added to Dir Matrix');
 }
 
 // ════════════════════════════════════════════════
@@ -1287,17 +1658,27 @@ function savePassword(){
   showNotif('🔑 Password updated');
 }
 function openDeleteUser(id){
-  deletingUserId=id;
-  const u=users.find(x=>x.id===id);
-  document.getElementById('delSub').textContent=`This will permanently delete "${u.name}" (${u.username}). This cannot be undone.`;
+  openDeleteItem('user',id,'user account');
+}
+function openDeleteItem(type,id,label){
+  deletePending={type,id};
+  const titles={user:'⚠️ Delete User',hrInt:'⚠️ Delete Integration',dirInt:'⚠️ Delete Integration',hrMx:'⚠️ Delete Matrix Row',dirMx:'⚠️ Delete Matrix Row'};
+  document.getElementById('delTitle').textContent=titles[type]||'⚠️ Delete Item';
+  document.getElementById('delSub').textContent=`Permanently delete "${label}"? This cannot be undone.`;
   document.getElementById('delModal').classList.add('show');
 }
 function confirmDelete(){
-  users=users.filter(u=>u.id!==deletingUserId);
+  if(!deletePending){closeOverlay('delModal');return;}
+  const {type,id}=deletePending;
+  if(type==='user'){users=users.filter(u=>u.id!==id);renderUsers();}
+  else if(type==='hrInt'){integrations=integrations.filter(x=>x.id!==id);renderHrTracker();renderDashboard();}
+  else if(type==='dirInt'){dirIntegrations=dirIntegrations.filter(x=>x.id!==id);renderDirTracker();}
+  else if(type==='hrMx'){featureMatrix=featureMatrix.filter(x=>x.id!==id);renderHrMatrix();}
+  else if(type==='dirMx'){dirFeatureMatrix=dirFeatureMatrix.filter(x=>x.id!==id);renderDirMatrix();}
+  deletePending=null;
   withLocalWrite(()=>spPush());
   closeOverlay('delModal');
-  renderUsers();
-  showNotif('🗑 User deleted');
+  showNotif('🗑 Deleted');
 }
 function closeOverlay(id){document.getElementById(id).classList.remove('show');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');}));
@@ -1313,7 +1694,7 @@ function saveJiraUrl(){
   cfg.jiraBase=document.getElementById('jiraUrl').value.trim();
   withLocalWrite(()=>spPush());
   closeOverlay('jiraModal');
-  renderTracker();
+  renderHrTracker();renderDirTracker();
   showNotif('🔗 JIRA base URL updated');
 }
 
@@ -1364,6 +1745,7 @@ function genEOD(){
   const ready=integrations.filter(i=>statusCat(i.status)==='ready');
   const blk=integrations.filter(i=>statusCat(i.status)==='blk');
   const dep=integrations.filter(i=>statusCat(i.status)==='dep');
+
   let h=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EOD Report ${d}</title><style>${RPT_CSS}</style></head><body><div class="container">
 <div class="hdr" style="background:linear-gradient(135deg,#0f2441,#1e3a5f,#1d4ed8)"><h1 style="font-size:20px;margin:0 0 4px">📋 ITSM QA — End of Day Report</h1><p style="opacity:.75;margin:0;font-size:13px">Prepared by QA Team · ${d} · Aquera</p></div>
 <div class="body">
@@ -1463,16 +1845,19 @@ function exportCSV(){
 
 function saveDash(){
   let html=document.documentElement.outerHTML;
-  const di=JSON.stringify(integrations), du=JSON.stringify(users), dm=JSON.stringify(featureMatrix), dc=JSON.stringify(cfg);
-  html=html.replace(/let integrations = \[[\s\S]*?\];/,'let integrations = '+di+';');
-  html=html.replace(/let users = \[[\s\S]*?\];/,'let users = '+du+';');
-  html=html.replace(/let featureMatrix = \[[\s\S]*?\];/,'let featureMatrix = '+dm+';');
-  html=html.replace(/let cfg = \{[\s\S]*?\};/,'let cfg = '+dc+';');
+  html=html.replace(/let integrations = \[[\s\S]*?\];/,'let integrations = '+JSON.stringify(integrations)+';');
+  html=html.replace(/let featureMatrix = \[[\s\S]*?\];/,'let featureMatrix = '+JSON.stringify(featureMatrix)+';');
+  html=html.replace(/let dirIntegrations = \[\];/,'let dirIntegrations = '+JSON.stringify(dirIntegrations)+';');
+  html=html.replace(/let dirFeatureMatrix = \[\];/,'let dirFeatureMatrix = '+JSON.stringify(dirFeatureMatrix)+';');
+  html=html.replace(/let users = \[[\s\S]*?\];/,'let users = '+JSON.stringify(users)+';');
+  html=html.replace(/let cfg = \{[\s\S]*?\};/,'let cfg = '+JSON.stringify(cfg)+';');
   html=html.replace(/let nextIntId = \d+;/,'let nextIntId = '+nextIntId+';');
   html=html.replace(/let nextMxId = \d+;/,'let nextMxId = '+nextMxId+';');
   html=html.replace(/let nextUserId = \d+;/,'let nextUserId = '+nextUserId+';');
+  html=html.replace(/let nextDirIntId = \d+;/,'let nextDirIntId = '+nextDirIntId+';');
+  html=html.replace(/let nextDirMxId = \d+;/,'let nextDirMxId = '+nextDirMxId+';');
   dl(`ITSM_QA_Dashboard_${todayStr()}.html`,'<!DOCTYPE html>'+html);
-  showNotif('💾 Backup downloaded — live data is in SharePoint.');
+  showNotif('💾 Backup downloaded');
 }
 
 function dl(name,content,mime){
