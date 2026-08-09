@@ -472,18 +472,19 @@ tbody tr:last-child td{border-bottom:none}
 
 <script>
 // ════════════════════════════════════════════════
-//  JSONBIN.IO CONFIG  (free — no credit card)
-//  Fill in JB_BIN_ID and JB_API_KEY below.
-//  Works from SharePoint, locally, or any URL.
-//  Setup takes ~3 minutes (see guide below).
+//  FIREBASE REALTIME DATABASE CONFIG
+//  Free forever (Google Spark plan) — no polling,
+//  changes push instantly to all connected users.
+//  Paste your database URL below after setup.
 // ════════════════════════════════════════════════
-const JB_BIN_ID  = '6a783bfdf5f4af5e29fdefdd';
-const JB_API_KEY = '$2a$10$kWSnt6C81c86NV2/.QA2xeMIsZlrvV6EGCrTmoxrtVD4ffDZRS0.K';
-const JB_READY   = JB_BIN_ID !== 'PASTE_BIN_ID' && JB_API_KEY !== 'PASTE_API_KEY';
-const JB_URL     = `https://api.jsonbin.io/v3/b/${JB_BIN_ID}`;
-let _lastVersion = null;  // version from JSONBin to detect remote changes
-let _pollTimer   = null;
-let _lwc         = 0;     // local-write counter: suppresses poll re-renders during saves
+const FB_URL   = 'https://itsm-qa-af568-default-rtdb.firebaseio.com';
+const FB_PATH  = '/itsm_data';
+const FB_READY = FB_URL !== 'PASTE_FIREBASE_URL_HERE';
+const FB_DATA_URL = FB_URL + FB_PATH + '.json';
+
+let _eventSource = null;
+let _lastTs      = 0;   // timestamp of last applied remote state
+let _lwc         = 0;   // local-write counter: suppresses SSE echoes during saves
 
 // ════════════════════════════════════════════════
 //  CONSTANTS
@@ -617,9 +618,10 @@ let colConfig = [
 ];
 
 // ════════════════════════════════════════════════
-//  JSONBIN.IO — REAL-TIME SYNC
-//  Free CORS-enabled storage. Works from SharePoint, locally, anywhere.
-//  Polls every 8 s — updates appear within ~8 seconds for all users.
+//  FIREBASE REALTIME DATABASE — INSTANT SYNC
+//  No polling. Firebase pushes changes to all users
+//  via a persistent SSE connection (EventSource).
+//  Free forever on Google Spark plan.
 // ════════════════════════════════════════════════
 function fbSync(state){
   const el=document.getElementById('syncPill');if(!el)return;
@@ -645,14 +647,13 @@ function applyState(state){
 async function spPush(){
   fbSync('saving');
   const state={integrations,featureMatrix,users,cfg,nextIntId,nextMxId,nextUserId,_ts:Date.now()};
-  // Always save locally first — instant, works offline
   lsSave(state);
-  _lastVersion=state._ts;
-  if(!JB_READY){fbSync('offline');return;}
+  _lastTs=state._ts;
+  if(!FB_READY){fbSync('offline');return;}
   try{
-    const r=await fetch(JB_URL,{
+    const r=await fetch(FB_DATA_URL,{
       method:'PUT',
-      headers:{'Content-Type':'application/json','X-Master-Key':JB_API_KEY,'X-Bin-Versioning':'false'},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify(state)
     });
     if(!r.ok){const msg=await r.text().catch(()=>'');throw new Error('PUT '+r.status+': '+msg);}
@@ -660,101 +661,106 @@ async function spPush(){
   }catch(e){
     console.error('spPush error:',e);
     fbSync('error');
-    // Retry in 15 s
     setTimeout(()=>spPush(),15000);
   }
 }
 
 async function initSharePoint(){
-  if(!JB_READY){
+  if(!FB_READY){
     fbSync('offline');
     if(can('admin')){const b=document.getElementById('setupBanner');if(b)b.style.display='block';}
-    // Still load from localStorage so previous session data is shown
     const local=lsLoad();
-    if(local){applyState(local);_lastVersion=local._ts||0;renderDashboard();if(activeTab==='tracker')renderTracker();if(activeTab==='matrix')renderMatrix();}
+    if(local){applyState(local);_lastTs=local._ts||0;renderDashboard();if(activeTab==='tracker')renderTracker();if(activeTab==='matrix')renderMatrix();}
     return;
   }
   fbSync('connecting');
   try{
-    const r=await fetch(JB_URL,{headers:{'X-Master-Key':JB_API_KEY}});
+    const r=await fetch(FB_DATA_URL);
     if(!r.ok){throw new Error('GET '+r.status);}
-    const j=await r.json();
-    const state=j.record||{};
-    _lastVersion=state._ts||0;
-    if(!state.integrations){
-      // Bin was just created — push current data
+    const state=await r.json();
+    if(!state||!state.integrations){
+      // First run — push default data to Firebase
       await spPush();
     }else{
+      _lastTs=state._ts||0;
       applyState(state);
-      lsSave(state); // keep local copy in sync
+      lsSave(state);
     }
     fbSync('live');
     renderDashboard();
     if(activeTab==='tracker')renderTracker();
     if(activeTab==='matrix')renderMatrix();
-    startPolling();
+    startRealtimeListener();
   }catch(e){
     console.error('initSharePoint error:',e);
     fbSync('error');
-    // Load from localStorage as fallback so data isn't lost
     const local=lsLoad();
     if(local){
-      applyState(local);_lastVersion=local._ts||0;
+      applyState(local);_lastTs=local._ts||0;
       renderDashboard();if(activeTab==='tracker')renderTracker();if(activeTab==='matrix')renderMatrix();
       showNotif('⚠️ Offline — showing locally saved data. Changes will sync when connection restores.');
     }
-    // Retry connection every 30 s
     setTimeout(()=>initSharePoint(),30000);
   }
 }
-function startPolling(){
-  if(_pollTimer)clearInterval(_pollTimer);
-  _pollTimer=setInterval(async()=>{
-    if(_lwc>0||!JB_READY)return;
+
+function startRealtimeListener(){
+  if(_eventSource){_eventSource.close();_eventSource=null;}
+  if(!FB_READY)return;
+  let firstEvent=true; // skip the initial snapshot echo (already loaded above)
+  const es=new EventSource(FB_DATA_URL);
+  _eventSource=es;
+  es.addEventListener('put',(e)=>{
     try{
-      const r=await fetch(JB_URL,{headers:{'X-Master-Key':JB_API_KEY}});
-      if(!r.ok)return;
-      const j=await r.json();
-      const state=j.record||{};
+      if(firstEvent){firstEvent=false;return;} // skip initial snapshot
+      if(_lwc>0)return; // suppress echoes of our own writes
+      const payload=JSON.parse(e.data);
+      const state=payload.data;
+      if(!state||!state.integrations)return;
       const ts=state._ts||0;
-      if(ts===_lastVersion)return; // nothing changed
-      _lastVersion=ts;
-      if(Array.isArray(state.integrations)){integrations=state.integrations;renderDashboard();if(activeTab==='tracker')renderTracker();}
-      if(Array.isArray(state.featureMatrix)&&activeTab==='matrix'){featureMatrix=state.featureMatrix;renderMatrix();}
-      if(Array.isArray(state.users)&&activeTab==='users'){users=state.users;renderUsers();}
-      if(state.cfg)cfg=state.cfg;
-      if(state.nextIntId)nextIntId=state.nextIntId;
-      if(state.nextMxId)nextMxId=state.nextMxId;
-      if(state.nextUserId)nextUserId=state.nextUserId;
+      if(ts<=_lastTs)return; // same or older — ignore
+      _lastTs=ts;
+      applyState(state);
+      lsSave(state);
+      renderDashboard();
+      if(activeTab==='tracker')renderTracker();
+      if(activeTab==='matrix')renderMatrix();
+      if(activeTab==='users')renderUsers();
       fbSync('live');
       showNotif('🔄 Updated by another team member');
-    }catch(e){console.warn('poll:',e);}
-  },8000);
+    }catch(err){console.warn('SSE parse error:',err);}
+  });
+  es.onerror=()=>{
+    fbSync('error');
+    es.close();
+    _eventSource=null;
+    setTimeout(()=>startRealtimeListener(),10000);
+  };
 }
 
 async function testConnection(){
-  if(!JB_READY){
-    alert('❌ NOT CONFIGURED\n\nJB_BIN_ID and JB_API_KEY are still set to the placeholder values.\n\nOpen the HTML file in Notepad, find PASTE_BIN_ID and PASTE_API_KEY, and replace them with your real values from jsonbin.io');
+  if(!FB_READY){
+    alert('❌ NOT CONFIGURED\n\nFB_URL is still set to the placeholder value.\n\nOpen index.html in a text editor, find PASTE_FIREBASE_URL_HERE and replace it with your Firebase Realtime Database URL.\n\nExample:\nhttps://your-project-default-rtdb.firebaseio.com');
     return;
   }
-  const msg=['🔍 Testing JSONBin connection…\n','Bin ID: '+JB_BIN_ID.slice(0,8)+'…','API Key: '+JB_API_KEY.slice(0,10)+'…','URL: '+JB_URL,'\nRunning GET test…'];
+  const msg=['🔍 Testing Firebase connection…\n','Database URL: '+FB_URL,'\nRunning GET test…'];
   try{
-    const r=await fetch(JB_URL,{headers:{'X-Master-Key':JB_API_KEY}});
+    const r=await fetch(FB_DATA_URL);
     if(r.ok){
-      const j=await r.json();
-      const ts=(j.record||{})._ts;
-      msg.push('\n✅ GET SUCCESS — bin is readable');
-      msg.push('Record has integrations: '+Array.isArray((j.record||{}).integrations));
-      msg.push('Last saved timestamp: '+(ts?new Date(ts).toLocaleString():'never (bin is empty)'));
+      const state=await r.json();
+      msg.push('\n✅ GET SUCCESS — Firebase is reachable');
+      msg.push('Has integrations: '+(state&&Array.isArray(state.integrations)?'Yes ('+state.integrations.length+' rows)':'No — will push on first save'));
+      msg.push('Last saved: '+(state&&state._ts?new Date(state._ts).toLocaleString():'never'));
+      msg.push('\n🟢 Live sync is active via real-time connection (no polling!)');
     }else{
       const body=await r.text();
       msg.push('\n❌ GET FAILED — HTTP '+r.status);
       msg.push('Error: '+body.slice(0,200));
-      msg.push('\nCommon causes:\n• Wrong Bin ID (check the URL in jsonbin.io)\n• Wrong API Key (copy Master Key from API Keys tab)\n• Extra spaces/quotes around the values');
+      msg.push('\nCommon causes:\n• Database rules are set to deny read\n• Wrong database URL — check Firebase Console → Realtime Database\n• Database not yet created (click "Create Database" in Firebase)');
     }
   }catch(e){
     msg.push('\n❌ NETWORK ERROR: '+e.message);
-    msg.push('This usually means CORS is blocked or no internet.');
+    msg.push('Make sure the Firebase URL is correct and HTTPS.');
   }
   alert(msg.join('\n'));
 }
@@ -790,7 +796,7 @@ function doLogin(){
 function doLogout(){
   currentUser=null;
   try{sessionStorage.removeItem('itsm_sess');}catch(e){}
-  if(_pollTimer){clearInterval(_pollTimer);_pollTimer=null;}
+  if(_eventSource){_eventSource.close();_eventSource=null;}
   document.getElementById('mainApp').style.display='none';
   document.getElementById('loginPage').style.display='flex';
   document.getElementById('lu').value='';
